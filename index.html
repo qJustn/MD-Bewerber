@@ -55,7 +55,7 @@
 
         <div class="hero-controls">
           <div class="field">
-            <label for="trainerName">Ausbilder</label>
+            <label for="trainerName">Aktiver Ausbilder</label>
             <input id="trainerName" class="input" type="text" placeholder="Name des Ausbilders…" />
           </div>
 
@@ -101,7 +101,7 @@
         </div>
       </div>
 
-      <!-- SEARCH + PROGRESS + ACTIONS -->
+      <!-- TOOLBAR -->
       <div class="toolbar">
         <div class="search-wrap">
           <span class="search-icon" aria-hidden="true">⌕</span>
@@ -125,6 +125,7 @@
             <label for="soundToggle">Hover-Sound</label>
           </div>
 
+          <button class="btn info" id="btnCorruption" type="button">Korruptionsfragen</button>
           <button class="btn ghost" id="btnReset" type="button">Zurücksetzen</button>
           <button class="btn primary" id="btnSave" type="button">Speichern</button>
           <button class="btn success" id="btnFinish" type="button">Einstellung abschließen</button>
@@ -141,9 +142,7 @@
       <article class="card" data-card="pre">
         <div class="card-head">
           <div class="card-title">
-            <span class="icon-badge i-a" aria-hidden="true">
-              <span class="mini-icon">📄</span>
-            </span>
+            <span class="icon-badge i-a" aria-hidden="true"><span class="mini-icon">📄</span></span>
             <div>
               <h2>Vor der Bewerbung</h2>
               <p class="card-sub">Prüfen & Freigeben</p>
@@ -167,9 +166,7 @@
       <article class="card" data-card="intro">
         <div class="card-head">
           <div class="card-title">
-            <span class="icon-badge i-b" aria-hidden="true">
-              <span class="mini-icon">💬</span>
-            </span>
+            <span class="icon-badge i-b" aria-hidden="true"><span class="mini-icon">💬</span></span>
             <div>
               <h2>Vorstellungsgespräch</h2>
               <p class="card-sub">Einweisung & Regeln</p>
@@ -185,7 +182,9 @@
 
           <div class="note warn">
             <div class="note-title">Korruption</div>
-            <div class="note-text">Nutze eure festgelegten Fragen/Regeln laut interner Vorgabe.</div>
+            <div class="note-text">
+              Öffne die Korruptionsfragen über <b>„Korruptionsfragen“</b> oben – dort gibt’s Beispiele + Copy.
+            </div>
           </div>
         </div>
       </article>
@@ -194,9 +193,7 @@
       <article class="card" data-card="discord">
         <div class="card-head">
           <div class="card-title">
-            <span class="icon-badge i-c" aria-hidden="true">
-              <span class="mini-icon">💻</span>
-            </span>
+            <span class="icon-badge i-c" aria-hidden="true"><span class="mini-icon">💻</span></span>
             <div>
               <h2>Discord & Dokumentation</h2>
               <p class="card-sub">Eintragen & kontrollieren</p>
@@ -218,9 +215,7 @@
       <article class="card" data-card="rp">
         <div class="card-head">
           <div class="card-title">
-            <span class="icon-badge i-d" aria-hidden="true">
-              <span class="mini-icon">🏥</span>
-            </span>
+            <span class="icon-badge i-d" aria-hidden="true"><span class="mini-icon">🏥</span></span>
             <div>
               <h2>In RP</h2>
               <p class="card-sub">Setup & Onboarding</p>
@@ -248,6 +243,35 @@
     </section>
   </main>
 
+  <!-- CORRUPTION MODAL -->
+  <div class="modal-backdrop" id="corruptionModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <div class="modal-badge">⚠️</div>
+          <div>
+            <div class="modal-title" id="modalTitle">Korruptionsfragen</div>
+            <div class="modal-sub">
+              Zusammengefasst: Privatmedic, außer Dienst hochholen, Medkits & Nadeln weitergeben, Telefonnummer weitergeben
+            </div>
+          </div>
+        </div>
+
+        <button class="icon-btn" id="btnCloseModal" type="button" title="Schließen">✕</button>
+      </div>
+
+      <div class="modal-tools">
+        <button class="btn ghost" id="btnRandomQuestion" type="button">Zufällige Frage</button>
+        <button class="btn primary" id="btnCopyAll" type="button">Alles kopieren</button>
+        <div class="modal-hint">Tipp: „Kopieren“ nutzt du direkt für Discord/Notizen.</div>
+      </div>
+
+      <div class="modal-body" id="questionsWrap">
+        <!-- questions injected by JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div class="toast" id="toast" aria-live="polite" aria-atomic="true">
     <div class="toast-inner">
@@ -264,5 +288,6 @@
       <span>Made by Bonez</span>
     </div>
   </footer>
+
 </body>
 </html>
