@@ -9,19 +9,20 @@
     :root{
       --bg:#070d14;
       --bg2:#07131a;
-      --stroke:rgba(0,255,200,.16);
       --text:#dff9ff;
       --muted:rgba(223,249,255,.68);
       --accent:#00ffc8;
       --accent2:#00aaff;
       --warn:#ffcc66;
+      --stroke:rgba(0,255,200,.16);
       --shadow:0 18px 60px rgba(0,0,0,.55);
     }
     *{box-sizing:border-box;margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
     body{
-      background: radial-gradient(1200px 700px at 20% 10%, rgba(0,255,200,.12), transparent 55%),
-                  radial-gradient(900px 600px at 90% 25%, rgba(0,170,255,.10), transparent 55%),
-                  linear-gradient(180deg, var(--bg2), var(--bg));
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(0,255,200,.12), transparent 55%),
+        radial-gradient(900px 600px at 90% 25%, rgba(0,170,255,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg2), var(--bg));
       color:var(--text);
       min-height:100vh;
       overflow-x:hidden;
@@ -71,6 +72,7 @@
       border:1px solid rgba(0,255,200,.18);
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
       user-select:none;
+      white-space:nowrap;
     }
     .chip-text{font-size:12px;color:rgba(223,249,255,.86);letter-spacing:.25px;}
     .status-dot{
@@ -140,6 +142,7 @@
       padding:14px;
       display:flex; gap:12px; align-items:center;
       transition:.22s;
+      min-height:72px;
     }
     .stat-card:hover{border-color:rgba(0,255,200,.28); transform:translateY(-2px); box-shadow:0 18px 40px rgba(0,0,0,.35);}
     .stat-icon{
@@ -208,17 +211,6 @@
     .btn.primary{background: linear-gradient(90deg, rgba(0,255,200,.22), rgba(0,170,255,.20));}
     .btn.success{background: linear-gradient(90deg, rgba(0,255,200,.28), rgba(0,255,130,.18));}
     .btn.ghost{background: rgba(0,0,0,.18);}
-    .btn.info{background: linear-gradient(90deg, rgba(255,204,102,.14), rgba(0,255,200,.10)); border-color: rgba(255,204,102,.22);}
-
-    .toggle{
-      display:flex; align-items:center; gap:8px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(0,255,200,.12);
-      background: rgba(0,0,0,.16);
-    }
-    .toggle label{font-size:12px;color:var(--muted);cursor:pointer}
-    .toggle input{accent-color: var(--accent); cursor:pointer}
 
     .container{padding:10px 18px 60px;}
     .grid{
@@ -241,8 +233,6 @@
       border-bottom:1px solid rgba(0,255,200,.10);
       background: linear-gradient(180deg, rgba(0,0,0,.16), transparent);
     }
-    .card-title h2{font-size:16px}
-    .card-sub{margin-top:3px;color:var(--muted);font-size:12px}
     .tag{
       font-size:11px;
       color:rgba(223,249,255,.9);
@@ -408,9 +398,13 @@
 
   <main class="container">
     <section class="grid">
+
       <article class="card">
         <div class="card-head">
-          <div><h2>Vor der Bewerbung</h2><div class="card-sub">Prüfen & Freigeben</div></div>
+          <div>
+            <h2>Vor der Bewerbung</h2>
+            <div class="muted" style="margin-top:4px">Prüfen & Freigeben</div>
+          </div>
           <span class="tag tag-high">PRIO</span>
         </div>
         <div class="list">
@@ -423,7 +417,10 @@
 
       <article class="card">
         <div class="card-head">
-          <div><h2>Vorstellungsgespräch</h2><div class="card-sub">Einweisung & Regeln</div></div>
+          <div>
+            <h2>Vorstellungsgespräch</h2>
+            <div class="muted" style="margin-top:4px">Einweisung & Regeln</div>
+          </div>
           <span class="tag">~2 MIN</span>
         </div>
         <div class="list">
@@ -435,7 +432,10 @@
 
       <article class="card">
         <div class="card-head">
-          <div><h2>Discord & Dokumentation</h2><div class="card-sub">Eintragen & kontrollieren</div></div>
+          <div>
+            <h2>Discord & Dokumentation</h2>
+            <div class="muted" style="margin-top:4px">Eintragen & kontrollieren</div>
+          </div>
           <span class="tag">5–10 MIN</span>
         </div>
         <div class="list">
@@ -449,7 +449,10 @@
 
       <article class="card">
         <div class="card-head">
-          <div><h2>In RP</h2><div class="card-sub">Setup & Onboarding</div></div>
+          <div>
+            <h2>In RP</h2>
+            <div class="muted" style="margin-top:4px">Setup & Onboarding</div>
+          </div>
           <span class="tag">~7 MIN</span>
         </div>
         <div class="list">
@@ -462,13 +465,14 @@
           <label class="item"><input type="checkbox" data-key="rp_places" /> Wichtige Örtlichkeiten zeigen</label>
         </div>
       </article>
+
     </section>
   </main>
 
-  <div class="toast" id="toast">
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true">
     <div class="toast-inner">
-      <div class="toast-title" id="toastTitle">Gespeichert</div>
-      <div class="toast-text" id="toastText">Deine Änderungen wurden gespeichert.</div>
+      <div class="toast-title" id="toastTitle">Hinweis</div>
+      <div class="toast-text" id="toastText">…</div>
     </div>
   </div>
 
@@ -480,281 +484,272 @@
     </div>
   </footer>
 
-
   <script>
-(() => {
-  "use strict";
+    (function(){
+      "use strict";
 
-  // ===== DEBUG OVERLAY =====
-  const debug = {
-    errors: 0,
-    el: null,
-    set(text) {
-      if (!this.el) {
-        const d = document.createElement("div");
-        d.style.cssText = `
-          position:fixed;top:10px;right:10px;z-index:999999;
-          background:rgba(0,0,0,.65);border:1px solid rgba(0,255,200,.35);
-          color:#dff9ff;padding:8px 10px;border-radius:12px;
-          font:12px/1.2 system-ui,Segoe UI,Roboto,Arial;backdrop-filter:blur(8px);
-          box-shadow:0 14px 40px rgba(0,0,0,.45);
-        `;
-        document.body.appendChild(d);
-        this.el = d;
+      const $ = (id) => document.getElementById(id);
+
+      const els = {
+        trainerName: $("trainerName"),
+        candidateName: $("candidateName"),
+        search: $("search"),
+        progressFill: $("progressFill"),
+        progressPercent: $("progressPercent"),
+        progressHint: $("progressHint"),
+        statToday: $("statToday"),
+        statTotal: $("statTotal"),
+        statOpen: $("statOpen"),
+        statDone: $("statDone"),
+        btnReset: $("btnReset"),
+        btnSave: $("btnSave"),
+        btnFinish: $("btnFinish"),
+        toast: $("toast"),
+        toastTitle: $("toastTitle"),
+        toastText: $("toastText"),
+        clock: $("clock"),
+        bpm: $("bpm"),
+      };
+
+      // Neue Keys -> alte kaputte Daten können nicht mehr crashen
+      const LS = {
+        trainer: "lsmd_trainer_name_v3",
+        candidate: "lsmd_candidate_name_v3",
+        checks: "lsmd_checks_v3",
+        counters: "lsmd_counters_v3",
+      };
+
+      function safeParse(json, fallback){
+        try{
+          if(!json) return fallback;
+          const v = JSON.parse(json);
+          return (v && typeof v === "object") ? v : fallback;
+        }catch{
+          return fallback;
+        }
       }
-      this.el.textContent = text;
-    }
-  };
 
-  window.addEventListener("error", (e) => {
-    debug.errors++;
-    debug.set(`JS ERROR (${debug.errors}) • ${String(e.message || e.error || "unknown")}`.slice(0, 120));
-  });
+      function showToast(title, msg){
+        if(!els.toast || !els.toastTitle || !els.toastText) return;
+        els.toastTitle.textContent = title;
+        els.toastText.textContent = msg;
+        els.toast.classList.add("show");
+        window.clearTimeout(showToast._t);
+        showToast._t = window.setTimeout(()=>els.toast.classList.remove("show"), 2200);
+      }
 
-  const $ = (id) => document.getElementById(id);
+      function todayKey(){
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      }
 
-  // ===== SAFE ELEMENT MAP =====
-  const els = {
-    trainerName: $("trainerName"),
-    candidateName: $("candidateName"),
-    search: $("search"),
-    progressFill: $("progressFill"),
-    progressPercent: $("progressPercent"),
-    progressHint: $("progressHint"),
-    statToday: $("statToday"),
-    statTotal: $("statTotal"),
-    statOpen: $("statOpen"),
-    statDone: $("statDone"),
-    btnReset: $("btnReset"),
-    btnSave: $("btnSave"),
-    btnFinish: $("btnFinish"),
-    toast: $("toast"),
-    toastTitle: $("toastTitle"),
-    toastText: $("toastText"),
-    clock: $("clock"),
-    bpm: $("bpm"),
-  };
+      function getCounters(){
+        const base = { total:0, todayCount:0, todayDate: todayKey() };
+        const data = safeParse(localStorage.getItem(LS.counters), base);
+        if(data.todayDate !== todayKey()){
+          data.todayDate = todayKey();
+          data.todayCount = 0;
+        }
+        data.total = Number(data.total)||0;
+        data.todayCount = Number(data.todayCount)||0;
+        return data;
+      }
 
-  // ===== STORAGE KEYS =====
-  const LS = {
-    trainer: "lsmd_trainer_name",
-    candidate: "lsmd_candidate_name",
-    checks: "lsmd_check_state_v2",
-    counters: "lsmd_counters_v2",
-  };
+      function setCounters(c){
+        localStorage.setItem(LS.counters, JSON.stringify(c));
+        if(els.statTotal) els.statTotal.textContent = String(c.total);
+        if(els.statToday) els.statToday.textContent = String(c.todayCount);
+      }
 
-  const safeParse = (s, fb) => { try { return JSON.parse(s); } catch { return fb; } };
+      function getCheckboxes(){
+        return Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
+      }
 
-  function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  }
+      function getState(){
+        return safeParse(localStorage.getItem(LS.checks), {});
+      }
 
-  function showToast(title, text) {
-    if (!els.toast || !els.toastTitle || !els.toastText) return;
-    els.toastTitle.textContent = title;
-    els.toastText.textContent = text;
-    els.toast.classList.add("show");
-    setTimeout(() => els.toast.classList.remove("show"), 2200);
-  }
+      function setState(state){
+        try{
+          localStorage.setItem(LS.checks, JSON.stringify(state || {}));
+        }catch{
+          // falls storage voll ist oder blockiert: ignore
+        }
+      }
 
-  // ===== CHECKBOXES =====
-  function getCheckboxes() {
-    return Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
-  }
+      function applyStateToUI(){
+        const state = getState();
+        const cbs = getCheckboxes();
+        for(const cb of cbs){
+          const key = cb?.dataset?.key;
+          cb.checked = !!(key && state && state[key]);
+        }
+      }
 
-  function updateProgress() {
-    const cbs = getCheckboxes();
-    const total = cbs.length;
-    const done = cbs.filter(cb => cb.checked).length;
-    const percent = total ? Math.round((done / total) * 100) : 0;
-    const open = total - done;
+      function recomputeProgress(){
+        const cbs = getCheckboxes();
+        const total = cbs.length;
+        const done = cbs.filter(cb => cb.checked).length;
+        const percent = total ? Math.round((done/total)*100) : 0;
+        const open = total - done;
 
-    if (els.progressPercent) els.progressPercent.textContent = String(percent);
-    if (els.progressFill) els.progressFill.style.width = `${percent}%`;
+        if(els.progressPercent) els.progressPercent.textContent = String(percent);
+        if(els.progressFill) els.progressFill.style.width = percent + "%";
+        if(els.statOpen) els.statOpen.textContent = String(open);
+        if(els.statDone) els.statDone.textContent = (percent === 100 ? "Ja" : "Nein");
 
-    if (els.statOpen) els.statOpen.textContent = String(open);
-    if (els.statDone) els.statDone.textContent = (percent === 100 ? "Ja" : "Nein");
+        if(els.progressHint){
+          if(done === 0) els.progressHint.textContent = "Noch nichts abgehakt.";
+          else if(percent < 100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
+          else els.progressHint.textContent = "Alles erledigt ✅";
+        }
 
-    if (els.progressHint) {
-      if (done === 0) els.progressHint.textContent = "Noch nichts abgehakt.";
-      else if (percent < 100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
-      else els.progressHint.textContent = "Alles erledigt ✅";
-    }
+        return { total, done, percent, open };
+      }
 
-    debug.set(`JS OK • CB: ${done}/${total} • ${percent}% • ERR:${debug.errors}`);
-    return { total, done, percent, open };
-  }
+      function saveAll(){
+        if(els.trainerName) localStorage.setItem(LS.trainer, (els.trainerName.value||"").trim());
+        if(els.candidateName) localStorage.setItem(LS.candidate, (els.candidateName.value||"").trim());
 
-  // ===== COUNTERS =====
-  function getCounters() {
-    const base = { total: 0, todayCount: 0, todayDate: todayKey() };
-    const data = safeParse(localStorage.getItem(LS.counters), null);
-    if (!data) return base;
+        const state = {};
+        for(const cb of getCheckboxes()){
+          const key = cb?.dataset?.key;
+          if(key) state[key] = !!cb.checked;
+        }
+        setState(state);
 
-    // reset daily
-    if (data.todayDate !== todayKey()) {
-      data.todayDate = todayKey();
-      data.todayCount = 0;
-    }
-    return {
-      total: Number(data.total) || 0,
-      todayCount: Number(data.todayCount) || 0,
-      todayDate: data.todayDate || todayKey(),
-    };
-  }
+        showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
+      }
 
-  function setCounters(c) {
-    localStorage.setItem(LS.counters, JSON.stringify(c));
-    if (els.statTotal) els.statTotal.textContent = String(c.total);
-    if (els.statToday) els.statToday.textContent = String(c.todayCount);
-  }
+      function resetAll(){
+        for(const cb of getCheckboxes()) cb.checked = false;
+        setState({});
+        recomputeProgress();
+        showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
+      }
 
-  // ===== SAVE/LOAD =====
-  function saveAll() {
-    if (els.trainerName) localStorage.setItem(LS.trainer, els.trainerName.value.trim());
-    if (els.candidateName) localStorage.setItem(LS.candidate, els.candidateName.value.trim());
+      function finish(){
+        const prog = recomputeProgress();
+        const trainer = (els.trainerName?.value || localStorage.getItem(LS.trainer) || "").trim();
+        const candidate = (els.candidateName?.value || localStorage.getItem(LS.candidate) || "").trim();
 
-    const state = {};
-    getCheckboxes().forEach(cb => state[cb.dataset.key] = !!cb.checked);
-    localStorage.setItem(LS.checks, JSON.stringify(state));
+        if(!trainer || !candidate){
+          showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
+          return;
+        }
+        if(prog.percent < 100){
+          showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
+          return;
+        }
 
-    showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
-  }
+        const c = getCounters();
+        c.total += 1;
+        c.todayCount += 1;
+        c.todayDate = todayKey();
+        setCounters(c);
 
-  function loadAll() {
-    if (els.trainerName) els.trainerName.value = localStorage.getItem(LS.trainer) || "";
-    if (els.candidateName) els.candidateName.value = localStorage.getItem(LS.candidate) || "";
+        showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
+      }
 
-    const state = safeParse(localStorage.getItem(LS.checks), {});
-    getCheckboxes().forEach(cb => cb.checked = !!state[cb.dataset.key]);
+      function applySearch(q){
+        q = (q||"").toLowerCase().trim();
+        const items = Array.from(document.querySelectorAll(".item"));
+        const cards = Array.from(document.querySelectorAll(".card"));
 
-    setCounters(getCounters());
-    updateProgress();
-  }
+        if(!q){
+          items.forEach(i=>i.style.display="");
+          cards.forEach(c=>c.style.display="");
+          return;
+        }
 
-  function resetAll() {
-    getCheckboxes().forEach(cb => cb.checked = false);
-    updateProgress();
-    saveAll();
-    showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
-  }
+        items.forEach(item=>{
+          const t = (item.textContent||"").toLowerCase();
+          item.style.display = t.includes(q) ? "" : "none";
+        });
 
-  function finishHiring() {
-    const { percent } = updateProgress();
-    const trainer = (els.trainerName?.value || "").trim();
-    const candidate = (els.candidateName?.value || "").trim();
+        cards.forEach(card=>{
+          const visible = Array.from(card.querySelectorAll(".item")).some(i=>i.style.display!=="none");
+          card.style.display = visible ? "" : "none";
+        });
+      }
 
-    if (!trainer || !candidate) {
-      showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
-      return;
-    }
-    if (percent < 100) {
-      showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
-      return;
-    }
+      function tickClock(){
+        if(!els.clock) return;
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2,"0");
+        const mm = String(d.getMinutes()).padStart(2,"0");
+        const ss = String(d.getSeconds()).padStart(2,"0");
+        els.clock.textContent = `${hh}:${mm}:${ss}`;
+      }
 
-    const c = getCounters();
-    c.total += 1;
-    c.todayCount += 1;
-    c.todayDate = todayKey();
-    setCounters(c);
+      let bpmVal = 78;
+      function tickBpm(){
+        if(!els.bpm) return;
+        const target = 72 + Math.round(Math.random()*14);
+        bpmVal = Math.round(bpmVal + (target - bpmVal) * 0.35);
+        els.bpm.textContent = String(bpmVal);
+      }
 
-    showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
-  }
+      function bind(){
+        // Checkbox change: sofort speichern + Fortschritt updaten (kein Crash möglich)
+        for(const cb of getCheckboxes()){
+          cb.addEventListener("change", ()=>{
+            const state = getState();
+            const key = cb?.dataset?.key;
+            if(key) state[key] = !!cb.checked;
+            setState(state);
+            recomputeProgress();
+          });
+        }
 
-  // ===== SEARCH =====
-  function applySearch(q) {
-    q = (q || "").toLowerCase().trim();
-    const allItems = Array.from(document.querySelectorAll(".item"));
-    const cards = Array.from(document.querySelectorAll(".card"));
+        // Inputs: optional autosave, aber safe
+        let t = null;
+        const autoSave = ()=>{
+          window.clearTimeout(t);
+          t = window.setTimeout(()=>saveAll(), 250);
+        };
+        els.trainerName?.addEventListener("input", autoSave);
+        els.candidateName?.addEventListener("input", autoSave);
 
-    if (!q) {
-      allItems.forEach(i => i.style.display = "");
-      cards.forEach(c => c.style.display = "");
-      return;
-    }
+        // Search
+        els.search?.addEventListener("input", (e)=>applySearch(e.target.value));
 
-    allItems.forEach(item => {
-      const t = (item.textContent || "").toLowerCase();
-      item.style.display = t.includes(q) ? "" : "none";
-    });
+        // Buttons
+        els.btnSave?.addEventListener("click", saveAll);
+        els.btnReset?.addEventListener("click", resetAll);
+        els.btnFinish?.addEventListener("click", finish);
+      }
 
-    cards.forEach(card => {
-      const visible = Array.from(card.querySelectorAll(".item"))
-        .some(i => i.style.display !== "none");
-      card.style.display = visible ? "" : "none";
-    });
-  }
+      function init(){
+        // Load values
+        if(els.trainerName) els.trainerName.value = localStorage.getItem(LS.trainer) || "";
+        if(els.candidateName) els.candidateName.value = localStorage.getItem(LS.candidate) || "";
 
-  // ===== CLOCK + BPM (SAFE) =====
-  function tickClock() {
-    if (!els.clock) return;
-    const d = new Date();
-    els.clock.textContent =
-      `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`;
-  }
+        // Counters
+        setCounters(getCounters());
 
-  let bpmVal = 78;
-  function tickBpm() {
-    if (!els.bpm) return;
-    const target = 72 + Math.round(Math.random() * 14);
-    bpmVal = Math.round(bpmVal + (target - bpmVal) * 0.35);
-    els.bpm.textContent = String(bpmVal);
-  }
+        // Apply checkbox state
+        applyStateToUI();
 
-  // ===== EVENTS =====
-  function bindEvents() {
-    // checkbox change
-    getCheckboxes().forEach(cb => {
-      cb.addEventListener("change", () => {
-        updateProgress();
-        // autosave checkbox state instantly
-        const state = safeParse(localStorage.getItem(LS.checks), {});
-        state[cb.dataset.key] = !!cb.checked;
-        localStorage.setItem(LS.checks, JSON.stringify(state));
-      });
-    });
+        // Compute progress
+        recomputeProgress();
 
-    // inputs
-    let t = null;
-    const debounced = () => {
-      clearTimeout(t);
-      t = setTimeout(saveAll, 250);
-    };
-    els.trainerName?.addEventListener("input", debounced);
-    els.candidateName?.addEventListener("input", debounced);
+        // Bind events
+        bind();
 
-    // search
-    els.search?.addEventListener("input", (e) => applySearch(e.target.value));
+        // Clock & bpm
+        tickClock(); setInterval(tickClock, 1000);
+        tickBpm(); setInterval(tickBpm, 2000);
 
-    // buttons
-    els.btnSave?.addEventListener("click", saveAll);
-    els.btnReset?.addEventListener("click", resetAll);
-    els.btnFinish?.addEventListener("click", finishHiring);
-  }
+        showToast("System bereit", "Alles läuft ✅");
+      }
 
-  // ===== INIT =====
-  function init() {
-    loadAll();
-    bindEvents();
-
-    tickClock(); setInterval(tickClock, 1000);
-    tickBpm(); setInterval(tickBpm, 2000);
-
-    // make sure progress is correct on first load
-    updateProgress();
-    showToast("System bereit", "JS läuft ✅");
-  }
-
-  // Run after DOM is ready
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-</script>
-   
+      if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", init);
+      }else{
+        init();
+      }
+    })();
+  </script>
 </body>
 </html>
