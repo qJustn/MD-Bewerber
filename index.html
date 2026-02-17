@@ -274,81 +274,6 @@
     .note-title{font-size:12px;font-weight:900}
     .note-text{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.35}
 
-    /* Modal */
-    .modal-backdrop{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(14px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      z-index:100;
-    }
-    .modal-backdrop.show{display:flex;}
-    .modal{
-      width:min(980px, 100%);
-      border-radius:22px;
-      border:1px solid rgba(0,255,200,.18);
-      background: rgba(0,0,0,.42);
-      box-shadow: 0 28px 90px rgba(0,0,0,.65);
-      overflow:hidden;
-    }
-    .modal-head{
-      display:flex; justify-content:space-between; align-items:flex-start;
-      padding:16px 16px 12px;
-      border-bottom:1px solid rgba(0,255,200,.12);
-    }
-    .modal-title{font-size:18px;font-weight:900}
-    .modal-sub{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.35}
-    .icon-btn{
-      width:38px;height:38px;border-radius:14px;
-      border:1px solid rgba(0,255,200,.14);
-      background: rgba(255,255,255,.04);
-      color:var(--text);
-      cursor:pointer;
-    }
-    .modal-tools{
-      display:flex; gap:10px; align-items:center;
-      padding:12px 16px;
-      border-bottom:1px solid rgba(0,255,200,.10);
-      flex-wrap:wrap;
-    }
-    .modal-hint{color:var(--muted);font-size:12px;margin-left:auto}
-    .modal-body{
-      padding:16px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-    .q-card{
-      border-radius:18px;
-      border:1px solid rgba(0,255,200,.12);
-      background: rgba(255,255,255,.03);
-      padding:12px;
-    }
-    .q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-    .q-index{
-      font-size:11px;
-      padding:5px 9px;
-      border-radius:999px;
-      border:1px solid rgba(0,255,200,.14);
-      background: rgba(0,255,200,.06);
-    }
-    .q-btn{
-      padding:7px 10px;
-      border-radius:12px;
-      border:1px solid rgba(0,255,200,.14);
-      background: rgba(0,0,0,.20);
-      color:var(--text);
-      cursor:pointer;
-      font-size:12px;
-    }
-    .q-text{color:rgba(223,249,255,.88); font-size:13px; line-height:1.42;}
-    .q-foot{margin-top:10px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;}
-    .q-foot input{accent-color:var(--accent);}
-
-    /* Toast */
     .toast{
       position:fixed; right:18px; bottom:18px;
       width:min(360px, calc(100% - 36px));
@@ -386,7 +311,6 @@
       .actions{justify-content:flex-start;}
       .hero-controls{min-width:unset;grid-template-columns:1fr;}
       .hero-head{flex-direction:column;}
-      .modal-body{grid-template-columns:1fr;}
     }
     @media (max-width:640px){
       .grid{grid-template-columns:1fr;}
@@ -415,9 +339,7 @@
     </div>
 
     <div class="topbar-right">
-      <div class="chip">
-        <span class="chip-text" id="clock">--:--:--</span>
-      </div>
+      <div class="chip"><span class="chip-text" id="clock">--:--:--</span></div>
 
       <div class="chip heartbeat-chip">
         <svg class="ekg" viewBox="0 0 120 32">
@@ -476,12 +398,6 @@
         </div>
 
         <div class="actions">
-          <div class="toggle">
-            <input id="soundToggle" type="checkbox" />
-            <label for="soundToggle">Hover-Sound</label>
-          </div>
-
-          <button class="btn info" id="btnCorruption" type="button">Korruptionsfragen</button>
           <button class="btn ghost" id="btnReset" type="button">Zurücksetzen</button>
           <button class="btn primary" id="btnSave" type="button">Speichern</button>
           <button class="btn success" id="btnFinish" type="button">Einstellung abschließen</button>
@@ -492,51 +408,34 @@
 
   <main class="container">
     <section class="grid">
-
       <article class="card">
         <div class="card-head">
-          <div>
-            <h2>Vor der Bewerbung</h2>
-            <div class="card-sub">Prüfen & Freigeben</div>
-          </div>
+          <div><h2>Vor der Bewerbung</h2><div class="card-sub">Prüfen & Freigeben</div></div>
           <span class="tag tag-high">PRIO</span>
         </div>
         <div class="list">
           <label class="item"><input type="checkbox" data-key="pre_license" /> Führerscheine kontrollieren</label>
           <label class="item"><input type="checkbox" data-key="pre_files" /> Aktencheck + Rechnungen + Durchsuchen</label>
           <label class="item"><input type="checkbox" data-key="pre_record" /> Strafakte prüfen (3+ Tage straffrei)</label>
-          <div class="note">
-            <div class="note-title">Hinweis</div>
-            <div class="note-text">Rechnungen nicht älter als 3 Tage akzeptieren.</div>
-          </div>
+          <div class="note"><div class="note-title">Hinweis</div><div class="note-text">Rechnungen nicht älter als 3 Tage akzeptieren.</div></div>
         </div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <div>
-            <h2>Vorstellungsgespräch</h2>
-            <div class="card-sub">Einweisung & Regeln</div>
-          </div>
+          <div><h2>Vorstellungsgespräch</h2><div class="card-sub">Einweisung & Regeln</div></div>
           <span class="tag">~2 MIN</span>
         </div>
         <div class="list">
           <label class="item"><input type="checkbox" data-key="intro_duty" /> Auf Dienstpflicht hinweisen (18–23 Uhr)</label>
           <label class="item"><input type="checkbox" data-key="intro_corruption" /> Korruption erfragen, erklären & Fragen stellen</label>
           <label class="item"><input type="checkbox" data-key="intro_discord" /> Auf MD Discord einladen</label>
-          <div class="note">
-            <div class="note-title">Korruption</div>
-            <div class="note-text">Nutze den Button <b>„Korruptionsfragen“</b> oben für Beispiele.</div>
-          </div>
         </div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <div>
-            <h2>Discord & Dokumentation</h2>
-            <div class="card-sub">Eintragen & kontrollieren</div>
-          </div>
+          <div><h2>Discord & Dokumentation</h2><div class="card-sub">Eintragen & kontrollieren</div></div>
           <span class="tag">5–10 MIN</span>
         </div>
         <div class="list">
@@ -550,10 +449,7 @@
 
       <article class="card">
         <div class="card-head">
-          <div>
-            <h2>In RP</h2>
-            <div class="card-sub">Setup & Onboarding</div>
-          </div>
+          <div><h2>In RP</h2><div class="card-sub">Setup & Onboarding</div></div>
           <span class="tag">~7 MIN</span>
         </div>
         <div class="list">
@@ -566,34 +462,9 @@
           <label class="item"><input type="checkbox" data-key="rp_places" /> Wichtige Örtlichkeiten zeigen</label>
         </div>
       </article>
-
     </section>
   </main>
 
-  <!-- MODAL -->
-  <div class="modal-backdrop" id="corruptionModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-head">
-        <div>
-          <div class="modal-title" id="modalTitle">Korruptionsfragen</div>
-          <div class="modal-sub">
-            Zusammengefasst: Privatmedic, außer Dienst hochholen, Medkits & Nadeln weitergeben, Telefonnummer weitergeben
-          </div>
-        </div>
-        <button class="icon-btn" id="btnCloseModal" type="button">✕</button>
-      </div>
-
-      <div class="modal-tools">
-        <button class="btn ghost" id="btnRandomQuestion" type="button">Zufällige Frage</button>
-        <button class="btn primary" id="btnCopyAll" type="button">Alles kopieren</button>
-        <div class="modal-hint">„Kopieren“ ist perfekt für Discord/Notizen.</div>
-      </div>
-
-      <div class="modal-body" id="questionsWrap"></div>
-    </div>
-  </div>
-
-  <!-- TOAST -->
   <div class="toast" id="toast">
     <div class="toast-inner">
       <div class="toast-title" id="toastTitle">Gespeichert</div>
@@ -609,17 +480,15 @@
     </div>
   </footer>
 
+  <!-- ✅ HIER IST DAS SCRIPT -->
   <script>
-    // === WICHTIG: Wenn du das in der Konsole siehst, läuft JS 100% ===
     console.log("LSMD JS läuft ✅");
 
     const LS = {
       trainer: "lsmd_trainer_name",
       candidate: "lsmd_candidate_name",
-      checks: "lsmd_check_state_v_inline",
-      sound: "lsmd_sound_enabled",
-      counters: "lsmd_counters_v1",
-      asked: "lsmd_corruption_asked_v1"
+      checks: "lsmd_check_state_v1",
+      counters: "lsmd_counters_v1"
     };
 
     const $ = (id) => document.getElementById(id);
@@ -643,24 +512,13 @@
       toastText: $("toastText"),
       clock: $("clock"),
       bpm: $("bpm"),
-      soundToggle: $("soundToggle"),
-
-      btnCorruption: $("btnCorruption"),
-      corruptionModal: $("corruptionModal"),
-      btnCloseModal: $("btnCloseModal"),
-      btnRandomQuestion: $("btnRandomQuestion"),
-      btnCopyAll: $("btnCopyAll"),
-      questionsWrap: $("questionsWrap"),
     };
 
-    const corruptionQuestions = [
-      "Du bist mit deinem Kumpel am Würfelpark unterwegs und er wird von einem Fahrzeug angefahren und dadurch bewusstlos, du bist Zivil. Wie reagierst du?",
-      "Dein Kumpel wird von einer fremden Person angegriffen und kann den Angreifer abwehren, nun ist der Angreifer bewusstlos. Du wirst von deinem Kumpel aufgefordert ihn nicht hochzuholen, du bist aber im Dienst. Wie reagierst du?",
-      "Ein Patient fragt dich ob du ihm Medkits und Defibrillatoren verkaufen kannst. Wie handelst du?",
-      "Du bist im Dienst und eine fremde Person kommt auf dich zu und fragt dich, ob er deine Telefonnummer haben kann um dich in Notfällen anrufen zu können. Wie reagierst du?"
-    ];
+    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
+    const items = Array.from(document.querySelectorAll(".item"));
 
     function safeParse(s, fb){ try { return JSON.parse(s); } catch { return fb; } }
+
     function todayKey(){
       const d=new Date();
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -687,19 +545,16 @@
         todayDate: data.todayDate || todayKey()
       };
     }
+
     function setCounters(c){
       localStorage.setItem(LS.counters, JSON.stringify(c));
       els.statTotal.textContent = String(c.total);
       els.statToday.textContent = String(c.todayCount);
     }
 
-    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
-    const items = Array.from(document.querySelectorAll(".item"));
-
     function load(){
       els.trainerName.value = localStorage.getItem(LS.trainer) || "";
       els.candidateName.value = localStorage.getItem(LS.candidate) || "";
-      els.soundToggle.checked = localStorage.getItem(LS.sound) === "1";
 
       const st = safeParse(localStorage.getItem(LS.checks), {});
       checkboxes.forEach(cb => cb.checked = !!st[cb.dataset.key]);
@@ -716,7 +571,6 @@
       checkboxes.forEach(cb => st[cb.dataset.key] = cb.checked);
       localStorage.setItem(LS.checks, JSON.stringify(st));
 
-      localStorage.setItem(LS.sound, els.soundToggle.checked ? "1" : "0");
       showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
     }
 
@@ -785,7 +639,6 @@
       showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
     }
 
-    // Clock + BPM
     function updateClock(){
       const d=new Date();
       const hh=String(d.getHours()).padStart(2,"0");
@@ -793,83 +646,12 @@
       const ss=String(d.getSeconds()).padStart(2,"0");
       els.clock.textContent = `${hh}:${mm}:${ss}`;
     }
+
     let bpm = 78;
     function updateBpm(){
       const target = 72 + Math.round(Math.random()*14);
       bpm = Math.round(bpm + (target-bpm)*0.35);
       els.bpm.textContent = String(bpm);
-    }
-
-    // Corruption modal
-    function openModal(){
-      renderQuestions();
-      els.corruptionModal.classList.add("show");
-      els.corruptionModal.setAttribute("aria-hidden","false");
-    }
-    function closeModal(){
-      els.corruptionModal.classList.remove("show");
-      els.corruptionModal.setAttribute("aria-hidden","true");
-    }
-    function getAsked(){ return safeParse(localStorage.getItem(LS.asked), {}); }
-    function setAsked(s){ localStorage.setItem(LS.asked, JSON.stringify(s)); }
-
-    async function copyText(text){
-      try { await navigator.clipboard.writeText(text); }
-      catch{
-        const ta=document.createElement("textarea");
-        ta.value=text; document.body.appendChild(ta); ta.select();
-        document.execCommand("copy"); document.body.removeChild(ta);
-      }
-      showToast("Kopiert", "In die Zwischenablage kopiert.");
-    }
-
-    function renderQuestions(){
-      const asked = getAsked();
-      els.questionsWrap.innerHTML = corruptionQuestions.map((q, idx)=>{
-        const id = "q_"+idx;
-        const checked = asked[id] ? "checked" : "";
-        return `
-          <div class="q-card">
-            <div class="q-top">
-              <div class="q-index">Frage ${idx+1}</div>
-              <button class="q-btn" type="button" data-copy="${idx}">Kopieren</button>
-            </div>
-            <div class="q-text">${q}</div>
-            <div class="q-foot">
-              <label><input type="checkbox" data-asked="${id}" ${checked}/> als gefragt markieren</label>
-              <span>${asked[id] ? "✅" : ""}</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      els.questionsWrap.querySelectorAll("[data-copy]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const idx=Number(btn.getAttribute("data-copy"));
-          copyText(`Korruptionsfrage ${idx+1}:\n${corruptionQuestions[idx]}`);
-        });
-      });
-      els.questionsWrap.querySelectorAll("[data-asked]").forEach(chk=>{
-        chk.addEventListener("change", ()=>{
-          const id = chk.getAttribute("data-asked");
-          const s = getAsked();
-          s[id] = chk.checked;
-          setAsked(s);
-          renderQuestions();
-        });
-      });
-    }
-
-    function randomQuestion(){
-      const idx = Math.floor(Math.random()*corruptionQuestions.length);
-      const cards = Array.from(els.questionsWrap.querySelectorAll(".q-card"));
-      cards[idx]?.scrollIntoView({behavior:"smooth", block:"center"});
-      showToast("Zufällige Frage", `Frage ${idx+1} gewählt.`);
-    }
-
-    function copyAll(){
-      const text = "Korruptionsfragen (LSMD)\n\n" + corruptionQuestions.map((q,i)=>`${i+1}) ${q}`).join("\n\n");
-      copyText(text);
     }
 
     // init
@@ -890,14 +672,6 @@
     els.btnSave.addEventListener("click", save);
     els.btnReset.addEventListener("click", resetAll);
     els.btnFinish.addEventListener("click", finish);
-
-    els.btnCorruption.addEventListener("click", openModal);
-    els.btnCloseModal.addEventListener("click", closeModal);
-    $("btnRandomQuestion").addEventListener("click", randomQuestion);
-    $("btnCopyAll").addEventListener("click", copyAll);
-
-    els.corruptionModal.addEventListener("click", (e)=>{ if(e.target===els.corruptionModal) closeModal(); });
-    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
 
     showToast("System bereit", "JS läuft ✅");
   </script>
