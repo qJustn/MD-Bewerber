@@ -5,8 +5,399 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LSMD • Ausbilder Checkliste</title>
 
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+  <style>
+    :root{
+      --bg:#070d14;
+      --bg2:#07131a;
+      --stroke:rgba(0,255,200,.16);
+      --text:#dff9ff;
+      --muted:rgba(223,249,255,.68);
+      --accent:#00ffc8;
+      --accent2:#00aaff;
+      --warn:#ffcc66;
+      --shadow:0 18px 60px rgba(0,0,0,.55);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    body{
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(0,255,200,.12), transparent 55%),
+                  radial-gradient(900px 600px at 90% 25%, rgba(0,170,255,.10), transparent 55%),
+                  linear-gradient(180deg, var(--bg2), var(--bg));
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    .bg-grid{
+      position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(0,255,200,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,200,.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      opacity:.55;
+      pointer-events:none;
+      z-index:-3;
+    }
+    .bg-glow{
+      position:fixed; width:560px; height:560px; border-radius:999px;
+      filter: blur(80px);
+      opacity:.28;
+      pointer-events:none;
+      z-index:-2;
+    }
+    .bg-glow-a{ left:-160px; top:80px; background:rgba(0,255,200,.45); }
+    .bg-glow-b{ right:-220px; top:140px; background:rgba(0,170,255,.38); }
+
+    .topbar{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:18px 26px;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid rgba(0,255,200,.12);
+      backdrop-filter: blur(14px);
+      position:sticky; top:0; z-index:10;
+    }
+    .brand{display:flex;align-items:center;gap:12px;}
+    .brand-dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      box-shadow: 0 0 12px rgba(0,255,200,.9);
+      animation: dotPulse 1.6s infinite;
+    }
+    .brand-title{font-weight:900;}
+    .brand-subtitle{font-size:12px;color:var(--muted);margin-top:2px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .chip{
+      display:flex; align-items:center; gap:10px;
+      padding:8px 12px; border-radius:999px;
+      background:rgba(0,255,200,.06);
+      border:1px solid rgba(0,255,200,.18);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      user-select:none;
+    }
+    .chip-text{font-size:12px;color:rgba(223,249,255,.86);letter-spacing:.25px;}
+    .status-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 10px rgba(0,255,200,.9);
+      animation: dotPulse 1.4s infinite;
+    }
+    .heartbeat-chip{
+      background:rgba(0,170,255,.06);
+      border-color:rgba(0,170,255,.18);
+    }
+    .ekg{width:120px;height:22px;opacity:.95}
+    .ekg polyline{
+      fill:none;
+      stroke:var(--accent);
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      stroke-dasharray:260;
+      stroke-dashoffset:260;
+      animation: ekgMove 2.4s linear infinite;
+    }
+
+    .hero{padding:30px 18px 10px;}
+    .hero-card{
+      max-width:1200px; margin:0 auto;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border:1px solid rgba(0,255,200,.14);
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .hero-head{
+      display:flex; justify-content:space-between; gap:22px;
+      padding:26px;
+      border-bottom:1px solid rgba(0,255,200,.10);
+    }
+    .hero-title h1{
+      font-size:30px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .hero-title p{margin-top:8px;color:var(--muted);max-width:660px;line-height:1.45;}
+    .hero-controls{display:grid; grid-template-columns:1fr 1fr; gap:12px; min-width:360px;}
+    .field label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block;}
+    .input{
+      width:100%; padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,255,200,.16);
+      background: rgba(0,0,0,.20);
+      color:var(--text);
+      outline:none;
+      transition:.2s;
+    }
+    .input:focus{border-color:rgba(0,255,200,.45); box-shadow:0 0 0 4px rgba(0,255,200,.08);}
+
+    .stats{
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:14px; padding:18px 26px 10px;
+    }
+    .stat-card{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(0,255,200,.12);
+      border-radius:18px;
+      padding:14px;
+      display:flex; gap:12px; align-items:center;
+      transition:.22s;
+    }
+    .stat-card:hover{border-color:rgba(0,255,200,.28); transform:translateY(-2px); box-shadow:0 18px 40px rgba(0,0,0,.35);}
+    .stat-icon{
+      width:40px;height:40px;border-radius:14px;
+      display:grid;place-items:center;
+      background: rgba(0,255,200,.08);
+      border:1px solid rgba(0,255,200,.16);
+      font-size:18px;
+    }
+    .stat-label{font-size:12px;color:var(--muted)}
+    .stat-value{font-size:22px;font-weight:900;margin-top:2px}
+
+    .toolbar{
+      display:grid;
+      grid-template-columns: 1.1fr 1fr auto;
+      gap:14px;
+      padding:18px 26px 26px;
+      align-items:end;
+    }
+    .search-wrap{position:relative;}
+    .search{
+      width:100%;
+      padding:12px 14px 12px 38px;
+      border-radius:16px;
+      border:1px solid rgba(0,255,200,.14);
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+    }
+    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(223,249,255,.55);}
+    .progress-wrap{
+      background: rgba(0,0,0,.16);
+      border:1px solid rgba(0,255,200,.12);
+      border-radius:18px;
+      padding:12px 14px;
+    }
+    .progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .muted{color:var(--muted);font-size:12px}
+    .progress-value{font-weight:900}
+    .progress-bar{
+      width:100%; height:10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      border:1px solid rgba(0,255,200,.10);
+    }
+    .progress-fill{
+      height:100%; width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow:0 0 18px rgba(0,255,200,.35);
+      transition: width .25s ease;
+    }
+    .progress-hint{margin-top:10px;font-size:12px;color:var(--muted);}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+    .btn{
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,255,200,.16);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      cursor:pointer;
+      transition:.18s;
+    }
+    .btn:hover{transform:translateY(-1px); border-color:rgba(0,255,200,.34); box-shadow:0 14px 30px rgba(0,0,0,.30);}
+    .btn.primary{background: linear-gradient(90deg, rgba(0,255,200,.22), rgba(0,170,255,.20));}
+    .btn.success{background: linear-gradient(90deg, rgba(0,255,200,.28), rgba(0,255,130,.18));}
+    .btn.ghost{background: rgba(0,0,0,.18);}
+    .btn.info{background: linear-gradient(90deg, rgba(255,204,102,.14), rgba(0,255,200,.10)); border-color: rgba(255,204,102,.22);}
+
+    .toggle{
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,255,200,.12);
+      background: rgba(0,0,0,.16);
+    }
+    .toggle label{font-size:12px;color:var(--muted);cursor:pointer}
+    .toggle input{accent-color: var(--accent); cursor:pointer}
+
+    .container{padding:10px 18px 60px;}
+    .grid{
+      max-width:1200px; margin:0 auto;
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
+    .card{
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(0,255,200,.12);
+      border-radius:22px;
+      box-shadow: 0 16px 45px rgba(0,0,0,.42);
+      overflow:hidden;
+      transition:.22s;
+    }
+    .card:hover{transform: translateY(-3px);border-color:rgba(0,255,200,.28);}
+    .card-head{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      padding:16px 16px 12px;
+      border-bottom:1px solid rgba(0,255,200,.10);
+      background: linear-gradient(180deg, rgba(0,0,0,.16), transparent);
+    }
+    .card-title h2{font-size:16px}
+    .card-sub{margin-top:3px;color:var(--muted);font-size:12px}
+    .tag{
+      font-size:11px;
+      color:rgba(223,249,255,.9);
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(0,255,200,.16);
+      background: rgba(0,255,200,.06);
+    }
+    .tag-high{border-color: rgba(255,107,107,.28); background: rgba(255,107,107,.08);}
+    .list{padding:14px 16px 16px;}
+    .item{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 10px;
+      border-radius:14px;
+      cursor:pointer;
+      transition:.14s;
+      border:1px solid transparent;
+    }
+    .item:hover{background: rgba(255,255,255,.03); border-color: rgba(0,255,200,.12);}
+    .item input{accent-color:var(--accent); cursor:pointer; width:16px; height:16px}
+
+    .note{
+      margin-top:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(0,255,200,.14);
+      background: rgba(0,0,0,.18);
+    }
+    .note-title{font-size:12px;font-weight:900}
+    .note-text{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.35}
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(14px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+    .modal-backdrop.show{display:flex;}
+    .modal{
+      width:min(980px, 100%);
+      border-radius:22px;
+      border:1px solid rgba(0,255,200,.18);
+      background: rgba(0,0,0,.42);
+      box-shadow: 0 28px 90px rgba(0,0,0,.65);
+      overflow:hidden;
+    }
+    .modal-head{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      padding:16px 16px 12px;
+      border-bottom:1px solid rgba(0,255,200,.12);
+    }
+    .modal-title{font-size:18px;font-weight:900}
+    .modal-sub{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.35}
+    .icon-btn{
+      width:38px;height:38px;border-radius:14px;
+      border:1px solid rgba(0,255,200,.14);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      cursor:pointer;
+    }
+    .modal-tools{
+      display:flex; gap:10px; align-items:center;
+      padding:12px 16px;
+      border-bottom:1px solid rgba(0,255,200,.10);
+      flex-wrap:wrap;
+    }
+    .modal-hint{color:var(--muted);font-size:12px;margin-left:auto}
+    .modal-body{
+      padding:16px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .q-card{
+      border-radius:18px;
+      border:1px solid rgba(0,255,200,.12);
+      background: rgba(255,255,255,.03);
+      padding:12px;
+    }
+    .q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .q-index{
+      font-size:11px;
+      padding:5px 9px;
+      border-radius:999px;
+      border:1px solid rgba(0,255,200,.14);
+      background: rgba(0,255,200,.06);
+    }
+    .q-btn{
+      padding:7px 10px;
+      border-radius:12px;
+      border:1px solid rgba(0,255,200,.14);
+      background: rgba(0,0,0,.20);
+      color:var(--text);
+      cursor:pointer;
+      font-size:12px;
+    }
+    .q-text{color:rgba(223,249,255,.88); font-size:13px; line-height:1.42;}
+    .q-foot{margin-top:10px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;}
+    .q-foot input{accent-color:var(--accent);}
+
+    /* Toast */
+    .toast{
+      position:fixed; right:18px; bottom:18px;
+      width:min(360px, calc(100% - 36px));
+      transform: translateY(24px);
+      opacity:0;
+      pointer-events:none;
+      transition:.22s;
+      z-index:200;
+    }
+    .toast.show{transform: translateY(0); opacity:1;}
+    .toast-inner{
+      padding:14px;
+      border-radius:18px;
+      border:1px solid rgba(0,255,200,.20);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+    .toast-title{font-weight:900}
+    .toast-text{margin-top:4px;color:var(--muted);font-size:12px}
+
+    .footer{
+      padding:26px 12px 34px;
+      display:flex;
+      justify-content:center;
+      color:rgba(223,249,255,.55);
+    }
+    .footer-inner{display:flex;gap:10px;align-items:center;font-size:12px;}
+    .sep{opacity:.45}
+
+    @media (max-width:1100px){
+      .stats{grid-template-columns:repeat(2,1fr);}
+      .grid{grid-template-columns:repeat(2,1fr);}
+      .toolbar{grid-template-columns:1fr;}
+      .actions{justify-content:flex-start;}
+      .hero-controls{min-width:unset;grid-template-columns:1fr;}
+      .hero-head{flex-direction:column;}
+      .modal-body{grid-template-columns:1fr;}
+    }
+    @media (max-width:640px){
+      .grid{grid-template-columns:1fr;}
+      .topbar{padding:14px 14px;}
+      .hero{padding:18px 12px 10px;}
+      .container{padding:10px 12px 60px;}
+    }
+
+    @keyframes ekgMove{0%{stroke-dashoffset:260}100%{stroke-dashoffset:0}}
+    @keyframes dotPulse{0%{transform:scale(1);opacity:.75}50%{transform:scale(1.18);opacity:1}100%{transform:scale(1);opacity:.75}}
+  </style>
 </head>
 
 <body>
@@ -14,37 +405,34 @@
   <div class="bg-glow bg-glow-a"></div>
   <div class="bg-glow bg-glow-b"></div>
 
-  <!-- TOPBAR -->
   <header class="topbar">
     <div class="brand">
-      <span class="brand-dot" aria-hidden="true"></span>
-      <div class="brand-text">
+      <span class="brand-dot"></span>
+      <div>
         <div class="brand-title">LSMD • Ausbilder Checkliste</div>
         <div class="brand-subtitle">Medical Department • Internes System</div>
       </div>
     </div>
 
     <div class="topbar-right">
-      <div class="chip clock-chip" title="Uhrzeit">
-        <span class="chip-icon">🕒</span>
+      <div class="chip">
         <span class="chip-text" id="clock">--:--:--</span>
       </div>
 
-      <div class="chip heartbeat-chip" title="Vital Monitor">
-        <svg class="ekg" viewBox="0 0 120 32" aria-hidden="true">
+      <div class="chip heartbeat-chip">
+        <svg class="ekg" viewBox="0 0 120 32">
           <polyline points="0,16 18,16 24,8 30,26 36,16 54,16 60,12 66,20 72,16 120,16"></polyline>
         </svg>
         <span class="chip-text"><span id="bpm">78</span> BPM</span>
       </div>
 
-      <div class="chip status-chip" title="Systemstatus">
-        <span class="status-dot" aria-hidden="true"></span>
+      <div class="chip">
+        <span class="status-dot"></span>
         <span class="chip-text">MEDICAL SYSTEM • ONLINE</span>
       </div>
     </div>
   </header>
 
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-card">
       <div class="hero-head">
@@ -58,7 +446,6 @@
             <label for="trainerName">Aktiver Ausbilder</label>
             <input id="trainerName" class="input" type="text" placeholder="Name des Ausbilders…" />
           </div>
-
           <div class="field">
             <label for="candidateName">Bewerber</label>
             <input id="candidateName" class="input" type="text" placeholder="Name des Bewerbers…" />
@@ -66,45 +453,16 @@
         </div>
       </div>
 
-      <!-- DASHBOARD STATS -->
       <div class="stats">
-        <div class="stat-card">
-          <div class="stat-icon pulse">🧾</div>
-          <div class="stat-meta">
-            <div class="stat-label">Einstellungen (Heute)</div>
-            <div class="stat-value" id="statToday">0</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">📦</div>
-          <div class="stat-meta">
-            <div class="stat-label">Einstellungen (Insgesamt)</div>
-            <div class="stat-value" id="statTotal">0</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">🟡</div>
-          <div class="stat-meta">
-            <div class="stat-label">Offene Punkte</div>
-            <div class="stat-value" id="statOpen">0</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">✅</div>
-          <div class="stat-meta">
-            <div class="stat-label">Abgeschlossen</div>
-            <div class="stat-value" id="statDone">Nein</div>
-          </div>
-        </div>
+        <div class="stat-card"><div class="stat-icon">🧾</div><div><div class="stat-label">Heute</div><div class="stat-value" id="statToday">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon">📦</div><div><div class="stat-label">Insgesamt</div><div class="stat-value" id="statTotal">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon">🟡</div><div><div class="stat-label">Offen</div><div class="stat-value" id="statOpen">0</div></div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div><div class="stat-label">Abgeschlossen</div><div class="stat-value" id="statDone">Nein</div></div></div>
       </div>
 
-      <!-- TOOLBAR -->
       <div class="toolbar">
         <div class="search-wrap">
-          <span class="search-icon" aria-hidden="true">⌕</span>
+          <span class="search-icon">⌕</span>
           <input id="search" class="search" type="text" placeholder="Checkliste durchsuchen (z.B. Funk, Rang, Ausweis…)" />
         </div>
 
@@ -113,9 +471,7 @@
             <span class="muted">Fortschritt</span>
             <span class="progress-value"><span id="progressPercent">0</span>%</span>
           </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width:0%"></div>
-          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
           <div class="progress-hint" id="progressHint">Noch nichts abgehakt.</div>
         </div>
 
@@ -134,23 +490,17 @@
     </div>
   </section>
 
-  <!-- CHECKLIST -->
   <main class="container">
-    <section class="grid" id="checklistGrid">
+    <section class="grid">
 
-      <!-- 1 -->
-      <article class="card" data-card="pre">
+      <article class="card">
         <div class="card-head">
-          <div class="card-title">
-            <span class="icon-badge i-a" aria-hidden="true"><span class="mini-icon">📄</span></span>
-            <div>
-              <h2>Vor der Bewerbung</h2>
-              <p class="card-sub">Prüfen & Freigeben</p>
-            </div>
+          <div>
+            <h2>Vor der Bewerbung</h2>
+            <div class="card-sub">Prüfen & Freigeben</div>
           </div>
           <span class="tag tag-high">PRIO</span>
         </div>
-
         <div class="list">
           <label class="item"><input type="checkbox" data-key="pre_license" /> Führerscheine kontrollieren</label>
           <label class="item"><input type="checkbox" data-key="pre_files" /> Aktencheck + Rechnungen + Durchsuchen</label>
@@ -162,46 +512,33 @@
         </div>
       </article>
 
-      <!-- 2 -->
-      <article class="card" data-card="intro">
+      <article class="card">
         <div class="card-head">
-          <div class="card-title">
-            <span class="icon-badge i-b" aria-hidden="true"><span class="mini-icon">💬</span></span>
-            <div>
-              <h2>Vorstellungsgespräch</h2>
-              <p class="card-sub">Einweisung & Regeln</p>
-            </div>
+          <div>
+            <h2>Vorstellungsgespräch</h2>
+            <div class="card-sub">Einweisung & Regeln</div>
           </div>
           <span class="tag">~2 MIN</span>
         </div>
-
         <div class="list">
           <label class="item"><input type="checkbox" data-key="intro_duty" /> Auf Dienstpflicht hinweisen (18–23 Uhr)</label>
           <label class="item"><input type="checkbox" data-key="intro_corruption" /> Korruption erfragen, erklären & Fragen stellen</label>
           <label class="item"><input type="checkbox" data-key="intro_discord" /> Auf MD Discord einladen</label>
-
-          <div class="note warn">
+          <div class="note">
             <div class="note-title">Korruption</div>
-            <div class="note-text">
-              Öffne die Korruptionsfragen über <b>„Korruptionsfragen“</b> oben – dort gibt’s Beispiele + Copy.
-            </div>
+            <div class="note-text">Nutze den Button <b>„Korruptionsfragen“</b> oben für Beispiele.</div>
           </div>
         </div>
       </article>
 
-      <!-- 3 -->
-      <article class="card" data-card="discord">
+      <article class="card">
         <div class="card-head">
-          <div class="card-title">
-            <span class="icon-badge i-c" aria-hidden="true"><span class="mini-icon">💻</span></span>
-            <div>
-              <h2>Discord & Dokumentation</h2>
-              <p class="card-sub">Eintragen & kontrollieren</p>
-            </div>
+          <div>
+            <h2>Discord & Dokumentation</h2>
+            <div class="card-sub">Eintragen & kontrollieren</div>
           </div>
           <span class="tag">5–10 MIN</span>
         </div>
-
         <div class="list">
           <label class="item"><input type="checkbox" data-key="dc_post" /> Einstellung posten (Format beachten)</label>
           <label class="item"><input type="checkbox" data-key="dc_log" /> Kontrolle im Log-Channel durchführen</label>
@@ -211,19 +548,14 @@
         </div>
       </article>
 
-      <!-- 4 -->
-      <article class="card" data-card="rp">
+      <article class="card">
         <div class="card-head">
-          <div class="card-title">
-            <span class="icon-badge i-d" aria-hidden="true"><span class="mini-icon">🏥</span></span>
-            <div>
-              <h2>In RP</h2>
-              <p class="card-sub">Setup & Onboarding</p>
-            </div>
+          <div>
+            <h2>In RP</h2>
+            <div class="card-sub">Setup & Onboarding</div>
           </div>
           <span class="tag">~7 MIN</span>
         </div>
-
         <div class="list">
           <label class="item"><input type="checkbox" data-key="rp_job" /> Job geben</label>
           <label class="item"><input type="checkbox" data-key="rp_jobmenu" /> Job-Menü erklären</label>
@@ -232,55 +564,43 @@
           <label class="item"><input type="checkbox" data-key="rp_clothes" /> Umziehen (Fraktionsumkleide im EG)</label>
           <label class="item"><input type="checkbox" data-key="rp_gear" /> Ausrüsten (z.B. Medkits/Defis)</label>
           <label class="item"><input type="checkbox" data-key="rp_places" /> Wichtige Örtlichkeiten zeigen</label>
-
-          <div class="note">
-            <div class="note-title">Tipp</div>
-            <div class="note-text">Zum Schluss Foto machen & in Clips/Bilder senden (falls vorgesehen).</div>
-          </div>
         </div>
       </article>
 
     </section>
   </main>
 
-  <!-- CORRUPTION MODAL -->
+  <!-- MODAL -->
   <div class="modal-backdrop" id="corruptionModal" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-head">
-        <div class="modal-title-wrap">
-          <div class="modal-badge">⚠️</div>
-          <div>
-            <div class="modal-title" id="modalTitle">Korruptionsfragen</div>
-            <div class="modal-sub">
-              Zusammengefasst: Privatmedic, außer Dienst hochholen, Medkits & Nadeln weitergeben, Telefonnummer weitergeben
-            </div>
+        <div>
+          <div class="modal-title" id="modalTitle">Korruptionsfragen</div>
+          <div class="modal-sub">
+            Zusammengefasst: Privatmedic, außer Dienst hochholen, Medkits & Nadeln weitergeben, Telefonnummer weitergeben
           </div>
         </div>
-
-        <button class="icon-btn" id="btnCloseModal" type="button" title="Schließen">✕</button>
+        <button class="icon-btn" id="btnCloseModal" type="button">✕</button>
       </div>
 
       <div class="modal-tools">
         <button class="btn ghost" id="btnRandomQuestion" type="button">Zufällige Frage</button>
         <button class="btn primary" id="btnCopyAll" type="button">Alles kopieren</button>
-        <div class="modal-hint">Tipp: „Kopieren“ nutzt du direkt für Discord/Notizen.</div>
+        <div class="modal-hint">„Kopieren“ ist perfekt für Discord/Notizen.</div>
       </div>
 
-      <div class="modal-body" id="questionsWrap">
-        <!-- questions injected by JS -->
-      </div>
+      <div class="modal-body" id="questionsWrap"></div>
     </div>
   </div>
 
   <!-- TOAST -->
-  <div class="toast" id="toast" aria-live="polite" aria-atomic="true">
+  <div class="toast" id="toast">
     <div class="toast-inner">
       <div class="toast-title" id="toastTitle">Gespeichert</div>
       <div class="toast-text" id="toastText">Deine Änderungen wurden gespeichert.</div>
     </div>
   </div>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
       <span>LSMD Intern • Ausbilder-System © 2026</span>
@@ -289,5 +609,297 @@
     </div>
   </footer>
 
+  <script>
+    // === WICHTIG: Wenn du das in der Konsole siehst, läuft JS 100% ===
+    console.log("LSMD JS läuft ✅");
+
+    const LS = {
+      trainer: "lsmd_trainer_name",
+      candidate: "lsmd_candidate_name",
+      checks: "lsmd_check_state_v_inline",
+      sound: "lsmd_sound_enabled",
+      counters: "lsmd_counters_v1",
+      asked: "lsmd_corruption_asked_v1"
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      trainerName: $("trainerName"),
+      candidateName: $("candidateName"),
+      search: $("search"),
+      progressFill: $("progressFill"),
+      progressPercent: $("progressPercent"),
+      progressHint: $("progressHint"),
+      statToday: $("statToday"),
+      statTotal: $("statTotal"),
+      statOpen: $("statOpen"),
+      statDone: $("statDone"),
+      btnReset: $("btnReset"),
+      btnSave: $("btnSave"),
+      btnFinish: $("btnFinish"),
+      toast: $("toast"),
+      toastTitle: $("toastTitle"),
+      toastText: $("toastText"),
+      clock: $("clock"),
+      bpm: $("bpm"),
+      soundToggle: $("soundToggle"),
+
+      btnCorruption: $("btnCorruption"),
+      corruptionModal: $("corruptionModal"),
+      btnCloseModal: $("btnCloseModal"),
+      btnRandomQuestion: $("btnRandomQuestion"),
+      btnCopyAll: $("btnCopyAll"),
+      questionsWrap: $("questionsWrap"),
+    };
+
+    const corruptionQuestions = [
+      "Du bist mit deinem Kumpel am Würfelpark unterwegs und er wird von einem Fahrzeug angefahren und dadurch bewusstlos, du bist Zivil. Wie reagierst du?",
+      "Dein Kumpel wird von einer fremden Person angegriffen und kann den Angreifer abwehren, nun ist der Angreifer bewusstlos. Du wirst von deinem Kumpel aufgefordert ihn nicht hochzuholen, du bist aber im Dienst. Wie reagierst du?",
+      "Ein Patient fragt dich ob du ihm Medkits und Defibrillatoren verkaufen kannst. Wie handelst du?",
+      "Du bist im Dienst und eine fremde Person kommt auf dich zu und fragt dich, ob er deine Telefonnummer haben kann um dich in Notfällen anrufen zu können. Wie reagierst du?"
+    ];
+
+    function safeParse(s, fb){ try { return JSON.parse(s); } catch { return fb; } }
+    function todayKey(){
+      const d=new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+
+    function showToast(t, m){
+      els.toastTitle.textContent = t;
+      els.toastText.textContent = m;
+      els.toast.classList.add("show");
+      setTimeout(()=>els.toast.classList.remove("show"), 2200);
+    }
+
+    function getCounters(){
+      const base = { total:0, todayCount:0, todayDate: todayKey() };
+      const data = safeParse(localStorage.getItem(LS.counters), null);
+      if(!data) return base;
+      if(data.todayDate !== todayKey()){
+        data.todayDate = todayKey();
+        data.todayCount = 0;
+      }
+      return {
+        total: Number(data.total)||0,
+        todayCount: Number(data.todayCount)||0,
+        todayDate: data.todayDate || todayKey()
+      };
+    }
+    function setCounters(c){
+      localStorage.setItem(LS.counters, JSON.stringify(c));
+      els.statTotal.textContent = String(c.total);
+      els.statToday.textContent = String(c.todayCount);
+    }
+
+    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
+    const items = Array.from(document.querySelectorAll(".item"));
+
+    function load(){
+      els.trainerName.value = localStorage.getItem(LS.trainer) || "";
+      els.candidateName.value = localStorage.getItem(LS.candidate) || "";
+      els.soundToggle.checked = localStorage.getItem(LS.sound) === "1";
+
+      const st = safeParse(localStorage.getItem(LS.checks), {});
+      checkboxes.forEach(cb => cb.checked = !!st[cb.dataset.key]);
+
+      setCounters(getCounters());
+      updateProgress();
+    }
+
+    function save(){
+      localStorage.setItem(LS.trainer, els.trainerName.value.trim());
+      localStorage.setItem(LS.candidate, els.candidateName.value.trim());
+
+      const st = {};
+      checkboxes.forEach(cb => st[cb.dataset.key] = cb.checked);
+      localStorage.setItem(LS.checks, JSON.stringify(st));
+
+      localStorage.setItem(LS.sound, els.soundToggle.checked ? "1" : "0");
+      showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
+    }
+
+    function updateProgress(){
+      const total = checkboxes.length;
+      const done = checkboxes.filter(c=>c.checked).length;
+      const percent = total ? Math.round((done/total)*100) : 0;
+
+      els.progressPercent.textContent = String(percent);
+      els.progressFill.style.width = percent + "%";
+
+      const open = total - done;
+      els.statOpen.textContent = String(open);
+      els.statDone.textContent = percent === 100 ? "Ja" : "Nein";
+
+      if(done===0) els.progressHint.textContent="Noch nichts abgehakt.";
+      else if(percent<100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
+      else els.progressHint.textContent = "Alles erledigt ✅";
+    }
+
+    function applySearch(q){
+      q = (q||"").toLowerCase().trim();
+      if(!q){
+        items.forEach(i=>i.style.display="");
+        document.querySelectorAll(".card").forEach(c=>c.style.display="");
+        return;
+      }
+      items.forEach(item=>{
+        const t=(item.textContent||"").toLowerCase();
+        item.style.display = t.includes(q) ? "" : "none";
+      });
+      document.querySelectorAll(".card").forEach(card=>{
+        const visible = Array.from(card.querySelectorAll(".item")).some(i=>i.style.display!=="none");
+        card.style.display = visible ? "" : "none";
+      });
+    }
+
+    function resetAll(){
+      checkboxes.forEach(cb=>cb.checked=false);
+      updateProgress();
+      save();
+      showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
+    }
+
+    function finish(){
+      updateProgress();
+      const percent = Number(els.progressPercent.textContent || "0");
+      const trainer = els.trainerName.value.trim();
+      const candidate = els.candidateName.value.trim();
+
+      if(!trainer || !candidate){
+        showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
+        return;
+      }
+      if(percent < 100){
+        showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
+        return;
+      }
+
+      const c = getCounters();
+      c.total += 1;
+      c.todayCount += 1;
+      c.todayDate = todayKey();
+      setCounters(c);
+
+      showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
+    }
+
+    // Clock + BPM
+    function updateClock(){
+      const d=new Date();
+      const hh=String(d.getHours()).padStart(2,"0");
+      const mm=String(d.getMinutes()).padStart(2,"0");
+      const ss=String(d.getSeconds()).padStart(2,"0");
+      els.clock.textContent = `${hh}:${mm}:${ss}`;
+    }
+    let bpm = 78;
+    function updateBpm(){
+      const target = 72 + Math.round(Math.random()*14);
+      bpm = Math.round(bpm + (target-bpm)*0.35);
+      els.bpm.textContent = String(bpm);
+    }
+
+    // Corruption modal
+    function openModal(){
+      renderQuestions();
+      els.corruptionModal.classList.add("show");
+      els.corruptionModal.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      els.corruptionModal.classList.remove("show");
+      els.corruptionModal.setAttribute("aria-hidden","true");
+    }
+    function getAsked(){ return safeParse(localStorage.getItem(LS.asked), {}); }
+    function setAsked(s){ localStorage.setItem(LS.asked, JSON.stringify(s)); }
+
+    async function copyText(text){
+      try { await navigator.clipboard.writeText(text); }
+      catch{
+        const ta=document.createElement("textarea");
+        ta.value=text; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+      }
+      showToast("Kopiert", "In die Zwischenablage kopiert.");
+    }
+
+    function renderQuestions(){
+      const asked = getAsked();
+      els.questionsWrap.innerHTML = corruptionQuestions.map((q, idx)=>{
+        const id = "q_"+idx;
+        const checked = asked[id] ? "checked" : "";
+        return `
+          <div class="q-card">
+            <div class="q-top">
+              <div class="q-index">Frage ${idx+1}</div>
+              <button class="q-btn" type="button" data-copy="${idx}">Kopieren</button>
+            </div>
+            <div class="q-text">${q}</div>
+            <div class="q-foot">
+              <label><input type="checkbox" data-asked="${id}" ${checked}/> als gefragt markieren</label>
+              <span>${asked[id] ? "✅" : ""}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      els.questionsWrap.querySelectorAll("[data-copy]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const idx=Number(btn.getAttribute("data-copy"));
+          copyText(`Korruptionsfrage ${idx+1}:\n${corruptionQuestions[idx]}`);
+        });
+      });
+      els.questionsWrap.querySelectorAll("[data-asked]").forEach(chk=>{
+        chk.addEventListener("change", ()=>{
+          const id = chk.getAttribute("data-asked");
+          const s = getAsked();
+          s[id] = chk.checked;
+          setAsked(s);
+          renderQuestions();
+        });
+      });
+    }
+
+    function randomQuestion(){
+      const idx = Math.floor(Math.random()*corruptionQuestions.length);
+      const cards = Array.from(els.questionsWrap.querySelectorAll(".q-card"));
+      cards[idx]?.scrollIntoView({behavior:"smooth", block:"center"});
+      showToast("Zufällige Frage", `Frage ${idx+1} gewählt.`);
+    }
+
+    function copyAll(){
+      const text = "Korruptionsfragen (LSMD)\n\n" + corruptionQuestions.map((q,i)=>`${i+1}) ${q}`).join("\n\n");
+      copyText(text);
+    }
+
+    // init
+    load();
+    updateClock(); setInterval(updateClock, 1000);
+    updateBpm(); setInterval(updateBpm, 2000);
+
+    checkboxes.forEach(cb=>{
+      cb.addEventListener("change", ()=>{
+        updateProgress();
+        const st = safeParse(localStorage.getItem(LS.checks), {});
+        st[cb.dataset.key] = cb.checked;
+        localStorage.setItem(LS.checks, JSON.stringify(st));
+      });
+    });
+
+    els.search.addEventListener("input", (e)=>applySearch(e.target.value));
+    els.btnSave.addEventListener("click", save);
+    els.btnReset.addEventListener("click", resetAll);
+    els.btnFinish.addEventListener("click", finish);
+
+    els.btnCorruption.addEventListener("click", openModal);
+    els.btnCloseModal.addEventListener("click", closeModal);
+    $("btnRandomQuestion").addEventListener("click", randomQuestion);
+    $("btnCopyAll").addEventListener("click", copyAll);
+
+    els.corruptionModal.addEventListener("click", (e)=>{ if(e.target===els.corruptionModal) closeModal(); });
+    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
+
+    showToast("System bereit", "JS läuft ✅");
+  </script>
 </body>
 </html>
