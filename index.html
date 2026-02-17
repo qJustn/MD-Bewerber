@@ -480,200 +480,281 @@
     </div>
   </footer>
 
-  <!-- ✅ HIER IST DAS SCRIPT -->
+
   <script>
-    console.log("LSMD JS läuft ✅");
+(() => {
+  "use strict";
 
-    const LS = {
-      trainer: "lsmd_trainer_name",
-      candidate: "lsmd_candidate_name",
-      checks: "lsmd_check_state_v1",
-      counters: "lsmd_counters_v1"
-    };
-
-    const $ = (id) => document.getElementById(id);
-
-    const els = {
-      trainerName: $("trainerName"),
-      candidateName: $("candidateName"),
-      search: $("search"),
-      progressFill: $("progressFill"),
-      progressPercent: $("progressPercent"),
-      progressHint: $("progressHint"),
-      statToday: $("statToday"),
-      statTotal: $("statTotal"),
-      statOpen: $("statOpen"),
-      statDone: $("statDone"),
-      btnReset: $("btnReset"),
-      btnSave: $("btnSave"),
-      btnFinish: $("btnFinish"),
-      toast: $("toast"),
-      toastTitle: $("toastTitle"),
-      toastText: $("toastText"),
-      clock: $("clock"),
-      bpm: $("bpm"),
-    };
-
-    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
-    const items = Array.from(document.querySelectorAll(".item"));
-
-    function safeParse(s, fb){ try { return JSON.parse(s); } catch { return fb; } }
-
-    function todayKey(){
-      const d=new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    }
-
-    function showToast(t, m){
-      els.toastTitle.textContent = t;
-      els.toastText.textContent = m;
-      els.toast.classList.add("show");
-      setTimeout(()=>els.toast.classList.remove("show"), 2200);
-    }
-
-    function getCounters(){
-      const base = { total:0, todayCount:0, todayDate: todayKey() };
-      const data = safeParse(localStorage.getItem(LS.counters), null);
-      if(!data) return base;
-      if(data.todayDate !== todayKey()){
-        data.todayDate = todayKey();
-        data.todayCount = 0;
+  // ===== DEBUG OVERLAY =====
+  const debug = {
+    errors: 0,
+    el: null,
+    set(text) {
+      if (!this.el) {
+        const d = document.createElement("div");
+        d.style.cssText = `
+          position:fixed;top:10px;right:10px;z-index:999999;
+          background:rgba(0,0,0,.65);border:1px solid rgba(0,255,200,.35);
+          color:#dff9ff;padding:8px 10px;border-radius:12px;
+          font:12px/1.2 system-ui,Segoe UI,Roboto,Arial;backdrop-filter:blur(8px);
+          box-shadow:0 14px 40px rgba(0,0,0,.45);
+        `;
+        document.body.appendChild(d);
+        this.el = d;
       }
-      return {
-        total: Number(data.total)||0,
-        todayCount: Number(data.todayCount)||0,
-        todayDate: data.todayDate || todayKey()
-      };
+      this.el.textContent = text;
     }
+  };
 
-    function setCounters(c){
-      localStorage.setItem(LS.counters, JSON.stringify(c));
-      els.statTotal.textContent = String(c.total);
-      els.statToday.textContent = String(c.todayCount);
-    }
+  window.addEventListener("error", (e) => {
+    debug.errors++;
+    debug.set(`JS ERROR (${debug.errors}) • ${String(e.message || e.error || "unknown")}`.slice(0, 120));
+  });
 
-    function load(){
-      els.trainerName.value = localStorage.getItem(LS.trainer) || "";
-      els.candidateName.value = localStorage.getItem(LS.candidate) || "";
+  const $ = (id) => document.getElementById(id);
 
-      const st = safeParse(localStorage.getItem(LS.checks), {});
-      checkboxes.forEach(cb => cb.checked = !!st[cb.dataset.key]);
+  // ===== SAFE ELEMENT MAP =====
+  const els = {
+    trainerName: $("trainerName"),
+    candidateName: $("candidateName"),
+    search: $("search"),
+    progressFill: $("progressFill"),
+    progressPercent: $("progressPercent"),
+    progressHint: $("progressHint"),
+    statToday: $("statToday"),
+    statTotal: $("statTotal"),
+    statOpen: $("statOpen"),
+    statDone: $("statDone"),
+    btnReset: $("btnReset"),
+    btnSave: $("btnSave"),
+    btnFinish: $("btnFinish"),
+    toast: $("toast"),
+    toastTitle: $("toastTitle"),
+    toastText: $("toastText"),
+    clock: $("clock"),
+    bpm: $("bpm"),
+  };
 
-      setCounters(getCounters());
-      updateProgress();
-    }
+  // ===== STORAGE KEYS =====
+  const LS = {
+    trainer: "lsmd_trainer_name",
+    candidate: "lsmd_candidate_name",
+    checks: "lsmd_check_state_v2",
+    counters: "lsmd_counters_v2",
+  };
 
-    function save(){
-      localStorage.setItem(LS.trainer, els.trainerName.value.trim());
-      localStorage.setItem(LS.candidate, els.candidateName.value.trim());
+  const safeParse = (s, fb) => { try { return JSON.parse(s); } catch { return fb; } };
 
-      const st = {};
-      checkboxes.forEach(cb => st[cb.dataset.key] = cb.checked);
-      localStorage.setItem(LS.checks, JSON.stringify(st));
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
 
-      showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
-    }
+  function showToast(title, text) {
+    if (!els.toast || !els.toastTitle || !els.toastText) return;
+    els.toastTitle.textContent = title;
+    els.toastText.textContent = text;
+    els.toast.classList.add("show");
+    setTimeout(() => els.toast.classList.remove("show"), 2200);
+  }
 
-    function updateProgress(){
-      const total = checkboxes.length;
-      const done = checkboxes.filter(c=>c.checked).length;
-      const percent = total ? Math.round((done/total)*100) : 0;
+  // ===== CHECKBOXES =====
+  function getCheckboxes() {
+    return Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
+  }
 
-      els.progressPercent.textContent = String(percent);
-      els.progressFill.style.width = percent + "%";
+  function updateProgress() {
+    const cbs = getCheckboxes();
+    const total = cbs.length;
+    const done = cbs.filter(cb => cb.checked).length;
+    const percent = total ? Math.round((done / total) * 100) : 0;
+    const open = total - done;
 
-      const open = total - done;
-      els.statOpen.textContent = String(open);
-      els.statDone.textContent = percent === 100 ? "Ja" : "Nein";
+    if (els.progressPercent) els.progressPercent.textContent = String(percent);
+    if (els.progressFill) els.progressFill.style.width = `${percent}%`;
 
-      if(done===0) els.progressHint.textContent="Noch nichts abgehakt.";
-      else if(percent<100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
+    if (els.statOpen) els.statOpen.textContent = String(open);
+    if (els.statDone) els.statDone.textContent = (percent === 100 ? "Ja" : "Nein");
+
+    if (els.progressHint) {
+      if (done === 0) els.progressHint.textContent = "Noch nichts abgehakt.";
+      else if (percent < 100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
       else els.progressHint.textContent = "Alles erledigt ✅";
     }
 
-    function applySearch(q){
-      q = (q||"").toLowerCase().trim();
-      if(!q){
-        items.forEach(i=>i.style.display="");
-        document.querySelectorAll(".card").forEach(c=>c.style.display="");
-        return;
-      }
-      items.forEach(item=>{
-        const t=(item.textContent||"").toLowerCase();
-        item.style.display = t.includes(q) ? "" : "none";
-      });
-      document.querySelectorAll(".card").forEach(card=>{
-        const visible = Array.from(card.querySelectorAll(".item")).some(i=>i.style.display!=="none");
-        card.style.display = visible ? "" : "none";
-      });
+    debug.set(`JS OK • CB: ${done}/${total} • ${percent}% • ERR:${debug.errors}`);
+    return { total, done, percent, open };
+  }
+
+  // ===== COUNTERS =====
+  function getCounters() {
+    const base = { total: 0, todayCount: 0, todayDate: todayKey() };
+    const data = safeParse(localStorage.getItem(LS.counters), null);
+    if (!data) return base;
+
+    // reset daily
+    if (data.todayDate !== todayKey()) {
+      data.todayDate = todayKey();
+      data.todayCount = 0;
+    }
+    return {
+      total: Number(data.total) || 0,
+      todayCount: Number(data.todayCount) || 0,
+      todayDate: data.todayDate || todayKey(),
+    };
+  }
+
+  function setCounters(c) {
+    localStorage.setItem(LS.counters, JSON.stringify(c));
+    if (els.statTotal) els.statTotal.textContent = String(c.total);
+    if (els.statToday) els.statToday.textContent = String(c.todayCount);
+  }
+
+  // ===== SAVE/LOAD =====
+  function saveAll() {
+    if (els.trainerName) localStorage.setItem(LS.trainer, els.trainerName.value.trim());
+    if (els.candidateName) localStorage.setItem(LS.candidate, els.candidateName.value.trim());
+
+    const state = {};
+    getCheckboxes().forEach(cb => state[cb.dataset.key] = !!cb.checked);
+    localStorage.setItem(LS.checks, JSON.stringify(state));
+
+    showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
+  }
+
+  function loadAll() {
+    if (els.trainerName) els.trainerName.value = localStorage.getItem(LS.trainer) || "";
+    if (els.candidateName) els.candidateName.value = localStorage.getItem(LS.candidate) || "";
+
+    const state = safeParse(localStorage.getItem(LS.checks), {});
+    getCheckboxes().forEach(cb => cb.checked = !!state[cb.dataset.key]);
+
+    setCounters(getCounters());
+    updateProgress();
+  }
+
+  function resetAll() {
+    getCheckboxes().forEach(cb => cb.checked = false);
+    updateProgress();
+    saveAll();
+    showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
+  }
+
+  function finishHiring() {
+    const { percent } = updateProgress();
+    const trainer = (els.trainerName?.value || "").trim();
+    const candidate = (els.candidateName?.value || "").trim();
+
+    if (!trainer || !candidate) {
+      showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
+      return;
+    }
+    if (percent < 100) {
+      showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
+      return;
     }
 
-    function resetAll(){
-      checkboxes.forEach(cb=>cb.checked=false);
-      updateProgress();
-      save();
-      showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
+    const c = getCounters();
+    c.total += 1;
+    c.todayCount += 1;
+    c.todayDate = todayKey();
+    setCounters(c);
+
+    showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
+  }
+
+  // ===== SEARCH =====
+  function applySearch(q) {
+    q = (q || "").toLowerCase().trim();
+    const allItems = Array.from(document.querySelectorAll(".item"));
+    const cards = Array.from(document.querySelectorAll(".card"));
+
+    if (!q) {
+      allItems.forEach(i => i.style.display = "");
+      cards.forEach(c => c.style.display = "");
+      return;
     }
 
-    function finish(){
-      updateProgress();
-      const percent = Number(els.progressPercent.textContent || "0");
-      const trainer = els.trainerName.value.trim();
-      const candidate = els.candidateName.value.trim();
+    allItems.forEach(item => {
+      const t = (item.textContent || "").toLowerCase();
+      item.style.display = t.includes(q) ? "" : "none";
+    });
 
-      if(!trainer || !candidate){
-        showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
-        return;
-      }
-      if(percent < 100){
-        showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
-        return;
-      }
+    cards.forEach(card => {
+      const visible = Array.from(card.querySelectorAll(".item"))
+        .some(i => i.style.display !== "none");
+      card.style.display = visible ? "" : "none";
+    });
+  }
 
-      const c = getCounters();
-      c.total += 1;
-      c.todayCount += 1;
-      c.todayDate = todayKey();
-      setCounters(c);
+  // ===== CLOCK + BPM (SAFE) =====
+  function tickClock() {
+    if (!els.clock) return;
+    const d = new Date();
+    els.clock.textContent =
+      `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`;
+  }
 
-      showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
-    }
+  let bpmVal = 78;
+  function tickBpm() {
+    if (!els.bpm) return;
+    const target = 72 + Math.round(Math.random() * 14);
+    bpmVal = Math.round(bpmVal + (target - bpmVal) * 0.35);
+    els.bpm.textContent = String(bpmVal);
+  }
 
-    function updateClock(){
-      const d=new Date();
-      const hh=String(d.getHours()).padStart(2,"0");
-      const mm=String(d.getMinutes()).padStart(2,"0");
-      const ss=String(d.getSeconds()).padStart(2,"0");
-      els.clock.textContent = `${hh}:${mm}:${ss}`;
-    }
-
-    let bpm = 78;
-    function updateBpm(){
-      const target = 72 + Math.round(Math.random()*14);
-      bpm = Math.round(bpm + (target-bpm)*0.35);
-      els.bpm.textContent = String(bpm);
-    }
-
-    // init
-    load();
-    updateClock(); setInterval(updateClock, 1000);
-    updateBpm(); setInterval(updateBpm, 2000);
-
-    checkboxes.forEach(cb=>{
-      cb.addEventListener("change", ()=>{
+  // ===== EVENTS =====
+  function bindEvents() {
+    // checkbox change
+    getCheckboxes().forEach(cb => {
+      cb.addEventListener("change", () => {
         updateProgress();
-        const st = safeParse(localStorage.getItem(LS.checks), {});
-        st[cb.dataset.key] = cb.checked;
-        localStorage.setItem(LS.checks, JSON.stringify(st));
+        // autosave checkbox state instantly
+        const state = safeParse(localStorage.getItem(LS.checks), {});
+        state[cb.dataset.key] = !!cb.checked;
+        localStorage.setItem(LS.checks, JSON.stringify(state));
       });
     });
 
-    els.search.addEventListener("input", (e)=>applySearch(e.target.value));
-    els.btnSave.addEventListener("click", save);
-    els.btnReset.addEventListener("click", resetAll);
-    els.btnFinish.addEventListener("click", finish);
+    // inputs
+    let t = null;
+    const debounced = () => {
+      clearTimeout(t);
+      t = setTimeout(saveAll, 250);
+    };
+    els.trainerName?.addEventListener("input", debounced);
+    els.candidateName?.addEventListener("input", debounced);
 
+    // search
+    els.search?.addEventListener("input", (e) => applySearch(e.target.value));
+
+    // buttons
+    els.btnSave?.addEventListener("click", saveAll);
+    els.btnReset?.addEventListener("click", resetAll);
+    els.btnFinish?.addEventListener("click", finishHiring);
+  }
+
+  // ===== INIT =====
+  function init() {
+    loadAll();
+    bindEvents();
+
+    tickClock(); setInterval(tickClock, 1000);
+    tickBpm(); setInterval(tickBpm, 2000);
+
+    // make sure progress is correct on first load
+    updateProgress();
     showToast("System bereit", "JS läuft ✅");
-  </script>
+  }
+
+  // Run after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+   
 </body>
 </html>
