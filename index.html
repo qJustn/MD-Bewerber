@@ -484,272 +484,312 @@
     </div>
   </footer>
 
-  <script>
-    (function(){
-      "use strict";
+ <script>
+(() => {
+  "use strict";
 
-      const $ = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-      const els = {
-        trainerName: $("trainerName"),
-        candidateName: $("candidateName"),
-        search: $("search"),
-        progressFill: $("progressFill"),
-        progressPercent: $("progressPercent"),
-        progressHint: $("progressHint"),
-        statToday: $("statToday"),
-        statTotal: $("statTotal"),
-        statOpen: $("statOpen"),
-        statDone: $("statDone"),
-        btnReset: $("btnReset"),
-        btnSave: $("btnSave"),
-        btnFinish: $("btnFinish"),
-        toast: $("toast"),
-        toastTitle: $("toastTitle"),
-        toastText: $("toastText"),
-        clock: $("clock"),
-        bpm: $("bpm"),
-      };
+  // ---- Elemente (alle optional, Script crasht nie) ----
+  const els = {
+    trainerName: $("trainerName"),
+    candidateName: $("candidateName"),
+    search: $("search"),
+    progressFill: $("progressFill"),
+    progressPercent: $("progressPercent"),
+    progressHint: $("progressHint"),
+    statToday: $("statToday"),
+    statTotal: $("statTotal"),
+    statOpen: $("statOpen"),
+    statDone: $("statDone"),
+    btnReset: $("btnReset"),
+    btnSave: $("btnSave"),
+    btnFinish: $("btnFinish"),
+    toast: $("toast"),
+    toastTitle: $("toastTitle"),
+    toastText: $("toastText"),
+    clock: $("clock"),
+    bpm: $("bpm"),
+  };
 
-      // Neue Keys -> alte kaputte Daten können nicht mehr crashen
-      const LS = {
-        trainer: "lsmd_trainer_name_v3",
-        candidate: "lsmd_candidate_name_v3",
-        checks: "lsmd_checks_v3",
-        counters: "lsmd_counters_v3",
-      };
+  // ---- LocalStorage Keys (v4 => alte kaputte Daten egal) ----
+  const LS = {
+    trainer: "lsmd_trainer_name_v4",
+    candidate: "lsmd_candidate_name_v4",
+    checks: "lsmd_checks_v4",
+    counters: "lsmd_counters_v4",
+  };
 
-      function safeParse(json, fallback){
-        try{
-          if(!json) return fallback;
-          const v = JSON.parse(json);
-          return (v && typeof v === "object") ? v : fallback;
-        }catch{
-          return fallback;
-        }
-      }
+  // ---- Google Sheets Webhook (DEINE URL EINFÜGEN) ----
+  const WEBHOOK_URL = "HIER_DEINE_GOOGLE_WEBAPP_URL";
 
-      function showToast(title, msg){
-        if(!els.toast || !els.toastTitle || !els.toastText) return;
-        els.toastTitle.textContent = title;
-        els.toastText.textContent = msg;
-        els.toast.classList.add("show");
-        window.clearTimeout(showToast._t);
-        showToast._t = window.setTimeout(()=>els.toast.classList.remove("show"), 2200);
-      }
+  // ---- Helpers ----
+  const safeParse = (s, fallback) => {
+    try {
+      if (!s) return fallback;
+      const v = JSON.parse(s);
+      return v && typeof v === "object" ? v : fallback;
+    } catch {
+      return fallback;
+    }
+  };
 
-      function todayKey(){
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      }
+  const nowISO = () => new Date().toISOString();
 
-      function getCounters(){
-        const base = { total:0, todayCount:0, todayDate: todayKey() };
-        const data = safeParse(localStorage.getItem(LS.counters), base);
-        if(data.todayDate !== todayKey()){
-          data.todayDate = todayKey();
-          data.todayCount = 0;
-        }
-        data.total = Number(data.total)||0;
-        data.todayCount = Number(data.todayCount)||0;
-        return data;
-      }
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
 
-      function setCounters(c){
-        localStorage.setItem(LS.counters, JSON.stringify(c));
-        if(els.statTotal) els.statTotal.textContent = String(c.total);
-        if(els.statToday) els.statToday.textContent = String(c.todayCount);
-      }
+  function showToast(title, msg) {
+    if (!els.toast || !els.toastTitle || !els.toastText) return;
+    els.toastTitle.textContent = title;
+    els.toastText.textContent = msg;
+    els.toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => els.toast.classList.remove("show"), 2200);
+  }
 
-      function getCheckboxes(){
-        return Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
-      }
+  function getCheckboxes() {
+    return Array.from(document.querySelectorAll('input[type="checkbox"][data-key]'));
+  }
 
-      function getState(){
-        return safeParse(localStorage.getItem(LS.checks), {});
-      }
+  function getState() {
+    return safeParse(localStorage.getItem(LS.checks), {});
+  }
 
-      function setState(state){
-        try{
-          localStorage.setItem(LS.checks, JSON.stringify(state || {}));
-        }catch{
-          // falls storage voll ist oder blockiert: ignore
-        }
-      }
+  function setState(state) {
+    try {
+      localStorage.setItem(LS.checks, JSON.stringify(state || {}));
+    } catch {
+      // ignore (storage voll/blockiert)
+    }
+  }
 
-      function applyStateToUI(){
+  function applyStateToUI() {
+    const state = getState();
+    for (const cb of getCheckboxes()) {
+      const key = cb?.dataset?.key;
+      cb.checked = !!(key && state[key]);
+    }
+  }
+
+  function recomputeProgress() {
+    const cbs = getCheckboxes();
+    const total = cbs.length;
+    const done = cbs.filter((cb) => cb.checked).length;
+    const percent = total ? Math.round((done / total) * 100) : 0;
+    const open = total - done;
+
+    if (els.progressPercent) els.progressPercent.textContent = String(percent);
+    if (els.progressFill) els.progressFill.style.width = `${percent}%`;
+    if (els.statOpen) els.statOpen.textContent = String(open);
+    if (els.statDone) els.statDone.textContent = percent === 100 ? "Ja" : "Nein";
+
+    if (els.progressHint) {
+      if (done === 0) els.progressHint.textContent = "Noch nichts abgehakt.";
+      else if (percent < 100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
+      else els.progressHint.textContent = "Alles erledigt ✅";
+    }
+
+    return { total, done, percent, open };
+  }
+
+  function getCounters() {
+    const base = { total: 0, todayCount: 0, todayDate: todayKey() };
+    const data = safeParse(localStorage.getItem(LS.counters), base);
+
+    if (data.todayDate !== todayKey()) {
+      data.todayDate = todayKey();
+      data.todayCount = 0;
+    }
+
+    data.total = Number(data.total) || 0;
+    data.todayCount = Number(data.todayCount) || 0;
+
+    return data;
+  }
+
+  function setCounters(c) {
+    localStorage.setItem(LS.counters, JSON.stringify(c));
+    if (els.statTotal) els.statTotal.textContent = String(c.total);
+    if (els.statToday) els.statToday.textContent = String(c.todayCount);
+  }
+
+  // ---- Logging in Google Sheet (crash-sicher) ----
+  async function logToSheet({ trainer, candidate, progress }) {
+    // Wenn du die URL noch nicht eingetragen hast, skippen wir still
+    if (!WEBHOOK_URL || WEBHOOK_URL.includes("HIER_DEINE_")) return;
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trainer,
+          candidate,
+          progress,
+          timestamp: nowISO(),
+          page: location.href
+        }),
+      });
+    } catch (e) {
+      console.warn("Log to Sheet failed:", e);
+      // Website soll trotzdem funktionieren
+    }
+  }
+
+  // ---- Save / Reset / Finish ----
+  function saveAll() {
+    if (els.trainerName) localStorage.setItem(LS.trainer, (els.trainerName.value || "").trim());
+    if (els.candidateName) localStorage.setItem(LS.candidate, (els.candidateName.value || "").trim());
+
+    const state = {};
+    for (const cb of getCheckboxes()) {
+      const key = cb?.dataset?.key;
+      if (key) state[key] = !!cb.checked;
+    }
+    setState(state);
+
+    showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
+  }
+
+  function resetAll() {
+    for (const cb of getCheckboxes()) cb.checked = false;
+    setState({});
+    recomputeProgress();
+    showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
+  }
+
+  async function finish() {
+    const prog = recomputeProgress();
+    const trainer = (els.trainerName?.value || localStorage.getItem(LS.trainer) || "").trim();
+    const candidate = (els.candidateName?.value || localStorage.getItem(LS.candidate) || "").trim();
+
+    if (!trainer || !candidate) {
+      showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
+      return;
+    }
+    if (prog.percent < 100) {
+      showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
+      return;
+    }
+
+    // Counters erhöhen
+    const c = getCounters();
+    c.total += 1;
+    c.todayCount += 1;
+    c.todayDate = todayKey();
+    setCounters(c);
+
+    showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
+
+    // Log nach extern (Google Sheet)
+    await logToSheet({ trainer, candidate, progress: prog.percent });
+  }
+
+  // ---- Suche ----
+  function applySearch(q) {
+    q = (q || "").toLowerCase().trim();
+    const items = Array.from(document.querySelectorAll(".item"));
+    const cards = Array.from(document.querySelectorAll(".card"));
+
+    if (!q) {
+      items.forEach((i) => (i.style.display = ""));
+      cards.forEach((c) => (c.style.display = ""));
+      return;
+    }
+
+    items.forEach((item) => {
+      const t = (item.textContent || "").toLowerCase();
+      item.style.display = t.includes(q) ? "" : "none";
+    });
+
+    cards.forEach((card) => {
+      const visible = Array.from(card.querySelectorAll(".item")).some((i) => i.style.display !== "none");
+      card.style.display = visible ? "" : "none";
+    });
+  }
+
+  // ---- Uhr + BPM ----
+  function tickClock() {
+    if (!els.clock) return;
+    const d = new Date();
+    els.clock.textContent =
+      `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+  }
+
+  let bpmVal = 78;
+  function tickBpm() {
+    if (!els.bpm) return;
+    const target = 72 + Math.round(Math.random() * 14);
+    bpmVal = Math.round(bpmVal + (target - bpmVal) * 0.35);
+    els.bpm.textContent = String(bpmVal);
+  }
+
+  // ---- Events ----
+  function bind() {
+    // Checkbox -> sofort speichern & progress
+    for (const cb of getCheckboxes()) {
+      cb.addEventListener("change", () => {
         const state = getState();
-        const cbs = getCheckboxes();
-        for(const cb of cbs){
-          const key = cb?.dataset?.key;
-          cb.checked = !!(key && state && state[key]);
-        }
-      }
-
-      function recomputeProgress(){
-        const cbs = getCheckboxes();
-        const total = cbs.length;
-        const done = cbs.filter(cb => cb.checked).length;
-        const percent = total ? Math.round((done/total)*100) : 0;
-        const open = total - done;
-
-        if(els.progressPercent) els.progressPercent.textContent = String(percent);
-        if(els.progressFill) els.progressFill.style.width = percent + "%";
-        if(els.statOpen) els.statOpen.textContent = String(open);
-        if(els.statDone) els.statDone.textContent = (percent === 100 ? "Ja" : "Nein");
-
-        if(els.progressHint){
-          if(done === 0) els.progressHint.textContent = "Noch nichts abgehakt.";
-          else if(percent < 100) els.progressHint.textContent = `${open} Punkt(e) noch offen.`;
-          else els.progressHint.textContent = "Alles erledigt ✅";
-        }
-
-        return { total, done, percent, open };
-      }
-
-      function saveAll(){
-        if(els.trainerName) localStorage.setItem(LS.trainer, (els.trainerName.value||"").trim());
-        if(els.candidateName) localStorage.setItem(LS.candidate, (els.candidateName.value||"").trim());
-
-        const state = {};
-        for(const cb of getCheckboxes()){
-          const key = cb?.dataset?.key;
-          if(key) state[key] = !!cb.checked;
-        }
+        const key = cb?.dataset?.key;
+        if (key) state[key] = !!cb.checked;
         setState(state);
-
-        showToast("Gespeichert", "Deine Änderungen wurden gespeichert.");
-      }
-
-      function resetAll(){
-        for(const cb of getCheckboxes()) cb.checked = false;
-        setState({});
         recomputeProgress();
-        showToast("Zurückgesetzt", "Alle Punkte wurden entfernt.");
-      }
+      });
+    }
 
-      function finish(){
-        const prog = recomputeProgress();
-        const trainer = (els.trainerName?.value || localStorage.getItem(LS.trainer) || "").trim();
-        const candidate = (els.candidateName?.value || localStorage.getItem(LS.candidate) || "").trim();
+    // Inputs -> autosave (debounced)
+    let t = null;
+    const autoSave = () => {
+      clearTimeout(t);
+      t = setTimeout(saveAll, 250);
+    };
+    els.trainerName?.addEventListener("input", autoSave);
+    els.candidateName?.addEventListener("input", autoSave);
 
-        if(!trainer || !candidate){
-          showToast("Fehlende Angaben", "Bitte Ausbilder + Bewerber eintragen.");
-          return;
-        }
-        if(prog.percent < 100){
-          showToast("Nicht fertig", "Nicht alle Punkte sind abgehakt.");
-          return;
-        }
+    // Search
+    els.search?.addEventListener("input", (e) => applySearch(e.target.value));
 
-        const c = getCounters();
-        c.total += 1;
-        c.todayCount += 1;
-        c.todayDate = todayKey();
-        setCounters(c);
+    // Buttons
+    els.btnSave?.addEventListener("click", saveAll);
+    els.btnReset?.addEventListener("click", resetAll);
+    els.btnFinish?.addEventListener("click", finish);
+  }
 
-        showToast("Abgeschlossen ✅", `${candidate} wurde von ${trainer} eingestellt.`);
-      }
+  // ---- Init ----
+  function init() {
+    // Namen laden
+    if (els.trainerName) els.trainerName.value = localStorage.getItem(LS.trainer) || "";
+    if (els.candidateName) els.candidateName.value = localStorage.getItem(LS.candidate) || "";
 
-      function applySearch(q){
-        q = (q||"").toLowerCase().trim();
-        const items = Array.from(document.querySelectorAll(".item"));
-        const cards = Array.from(document.querySelectorAll(".card"));
+    // Counters laden
+    setCounters(getCounters());
 
-        if(!q){
-          items.forEach(i=>i.style.display="");
-          cards.forEach(c=>c.style.display="");
-          return;
-        }
+    // Checkbox State laden
+    applyStateToUI();
 
-        items.forEach(item=>{
-          const t = (item.textContent||"").toLowerCase();
-          item.style.display = t.includes(q) ? "" : "none";
-        });
+    // Progress initial
+    recomputeProgress();
 
-        cards.forEach(card=>{
-          const visible = Array.from(card.querySelectorAll(".item")).some(i=>i.style.display!=="none");
-          card.style.display = visible ? "" : "none";
-        });
-      }
+    // Events binden
+    bind();
 
-      function tickClock(){
-        if(!els.clock) return;
-        const d = new Date();
-        const hh = String(d.getHours()).padStart(2,"0");
-        const mm = String(d.getMinutes()).padStart(2,"0");
-        const ss = String(d.getSeconds()).padStart(2,"0");
-        els.clock.textContent = `${hh}:${mm}:${ss}`;
-      }
+    // Uhr/BPM starten
+    tickClock(); setInterval(tickClock, 1000);
+    tickBpm(); setInterval(tickBpm, 2000);
 
-      let bpmVal = 78;
-      function tickBpm(){
-        if(!els.bpm) return;
-        const target = 72 + Math.round(Math.random()*14);
-        bpmVal = Math.round(bpmVal + (target - bpmVal) * 0.35);
-        els.bpm.textContent = String(bpmVal);
-      }
+    showToast("System bereit", "Alles läuft ✅");
+  }
 
-      function bind(){
-        // Checkbox change: sofort speichern + Fortschritt updaten (kein Crash möglich)
-        for(const cb of getCheckboxes()){
-          cb.addEventListener("change", ()=>{
-            const state = getState();
-            const key = cb?.dataset?.key;
-            if(key) state[key] = !!cb.checked;
-            setState(state);
-            recomputeProgress();
-          });
-        }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
 
-        // Inputs: optional autosave, aber safe
-        let t = null;
-        const autoSave = ()=>{
-          window.clearTimeout(t);
-          t = window.setTimeout(()=>saveAll(), 250);
-        };
-        els.trainerName?.addEventListener("input", autoSave);
-        els.candidateName?.addEventListener("input", autoSave);
-
-        // Search
-        els.search?.addEventListener("input", (e)=>applySearch(e.target.value));
-
-        // Buttons
-        els.btnSave?.addEventListener("click", saveAll);
-        els.btnReset?.addEventListener("click", resetAll);
-        els.btnFinish?.addEventListener("click", finish);
-      }
-
-      function init(){
-        // Load values
-        if(els.trainerName) els.trainerName.value = localStorage.getItem(LS.trainer) || "";
-        if(els.candidateName) els.candidateName.value = localStorage.getItem(LS.candidate) || "";
-
-        // Counters
-        setCounters(getCounters());
-
-        // Apply checkbox state
-        applyStateToUI();
-
-        // Compute progress
-        recomputeProgress();
-
-        // Bind events
-        bind();
-
-        // Clock & bpm
-        tickClock(); setInterval(tickClock, 1000);
-        tickBpm(); setInterval(tickBpm, 2000);
-
-        showToast("System bereit", "Alles läuft ✅");
-      }
-
-      if(document.readyState === "loading"){
-        document.addEventListener("DOMContentLoaded", init);
-      }else{
-        init();
-      }
-    })();
-  </script>
 </body>
 </html>
