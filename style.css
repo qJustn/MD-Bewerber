@@ -104,3 +104,90 @@ footer {
     margin-top: 40px;
     opacity: 0.5;
 }
+/* GRID BACKGROUND */
+body::before {
+    content: "";
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0,255,200,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,200,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: -1;
+}
+
+/* RIGHT UI */
+.right-ui {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* STATUS BOX */
+.status-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,255,200,0.08);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #00ffc8;
+    border: 1px solid rgba(0,255,200,0.2);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #00ffc8;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+/* HEARTBEAT BOX */
+.heartbeat-box {
+    width: 120px;
+    height: 35px;
+    background: rgba(0,255,200,0.05);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border: 1px solid rgba(0,255,200,0.2);
+}
+
+.heartbeat {
+    width: 100%;
+    height: 100%;
+}
+
+.heartbeat polyline {
+    fill: none;
+    stroke: #00ffc8;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: heartbeatMove 2s linear infinite;
+}
+
+/* ANIMATIONEN */
+@keyframes heartbeatMove {
+    0% { stroke-dasharray: 200; stroke-dashoffset: 200; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 5px #00ffc8; }
+    50% { box-shadow: 0 0 15px #00ffc8; }
+    100% { box-shadow: 0 0 5px #00ffc8; }
+}
+
+/* LOGO DOT */
+.pulse-dot {
+    width: 10px;
+    height: 10px;
+    background: #00ffc8;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ffc8;
+}
