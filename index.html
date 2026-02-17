@@ -1,66 +1,195 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>LSMD Ausbilder Checkliste</title>
-    <link rel="stylesheet" href="style.css">
-    <script defer src="script.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LSMD • Ausbilder Checkliste</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
 </head>
+
 <body>
 
-<header class="topbar">
-    <div class="logo">
-        <span class="pulse"></span>
-        <h1>LSMD • Ausbilder Checkliste</h1>
-    </div>
-    <div class="status">MEDICAL SYSTEM • ONLINE</div>
-</header>
-
-<section class="hero">
-    <h2>Digitale Einstellungs-Checkliste</h2>
-    <p>Standardisiertes Vorgehen für Bewerbungen & Einstellungen</p>
-</section>
-
-<section class="checklist-container">
-
-    <div class="card">
-        <h3>📋 Vor der Bewerbung</h3>
-
-        <label><input type="checkbox"> Führerscheine kontrollieren</label>
-        <label><input type="checkbox"> Aktencheck durchführen</label>
-        <label><input type="checkbox"> Strafakte prüfen</label>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <div class="brand-text">
+          <div class="brand-title">LSMD • Ausbilder Checkliste</div>
+          <div class="brand-subtitle">Interne digitale Einstellungs-Checkliste</div>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-        <h3>💬 Vorstellungsgespräch</h3>
+    <div class="topbar-right">
+      <div class="chip heartbeat-chip" title="Herzfrequenz Monitor">
+        <svg class="heartbeat" viewBox="0 0 120 32" aria-hidden="true">
+          <polyline points="0,16 18,16 24,8 30,26 36,16 54,16 60,12 66,20 72,16 120,16" />
+        </svg>
+        <span class="chip-text"><span id="bpm">78</span> BPM</span>
+      </div>
 
-        <label><input type="checkbox"> Dienstpflicht erklären</label>
-        <label><input type="checkbox"> Korruptionsfragen stellen</label>
-        <label><input type="checkbox"> Auf MD Discord einladen</label>
+      <div class="chip status-chip">
+        <span class="status-dot"></span>
+        <span class="chip-text">MEDICAL SYSTEM • ONLINE</span>
+      </div>
     </div>
+  </header>
 
-    <div class="card">
-        <h3>💻 Discord & Dokumentation</h3>
+  <!-- Hero / Header Card -->
+  <section class="hero">
+    <div class="hero-card">
+      <div class="hero-header">
+        <div class="hero-title">
+          <h1>Digitale Einstellungs-Checkliste</h1>
+          <p>Standardisiertes Vorgehen für Bewerbungen & Einstellungen – strukturiert, sauber, nachvollziehbar.</p>
+        </div>
 
-        <label><input type="checkbox"> Einstellung posten</label>
-        <label><input type="checkbox"> Rang eintragen</label>
-        <label><input type="checkbox"> Ausweis erstellen</label>
+        <div class="hero-meta">
+          <div class="meta-box">
+            <div class="meta-label">Aktiver Ausbilder</div>
+            <div class="meta-value" id="activeTrainer">—</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-label">Bewerber</div>
+            <div class="meta-value">
+              <input class="input" id="candidateName" type="text" placeholder="Name eingeben…" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input id="search" class="search" type="text" placeholder="Checkliste durchsuchen (z.B. Funk, Rang, Ausweis…)" />
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-head">
+            <span>Fortschritt</span>
+            <span class="progress-value"><span id="progressPercent">0</span>%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+          </div>
+          <div class="progress-hint" id="progressHint">Noch nichts abgehakt.</div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn ghost" id="btnReset" type="button">Zurücksetzen</button>
+          <button class="btn primary" id="btnSave" type="button">Speichern</button>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="card">
-        <h3>🏥 In RP</h3>
+  <!-- Checklist Grid -->
+  <main class="container">
+    <section class="grid" id="checklistGrid">
 
-        <label><input type="checkbox"> Job vergeben</label>
-        <label><input type="checkbox"> Funk einrichten</label>
-        <label><input type="checkbox"> Ausrüstung geben</label>
-        <label><input type="checkbox"> Wichtige Orte zeigen</label>
+      <!-- Card: Vor der Bewerbung -->
+      <article class="card" data-section="vor-der-bewerbung">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="card-icon">📄</span>
+            <h2>Vor der Bewerbung</h2>
+          </div>
+          <span class="badge">Prio</span>
+        </div>
+
+        <div class="card-body">
+          <label class="item"><input type="checkbox" data-key="pre-license" /> Führerscheine kontrollieren</label>
+          <label class="item"><input type="checkbox" data-key="pre-files" /> Aktencheck + Rechnungen + Durchsuchen</label>
+          <label class="item"><input type="checkbox" data-key="pre-record" /> Strafakte prüfen (3+ Tage straffrei)</label>
+
+          <div class="note">
+            <div class="note-title">Hinweis</div>
+            <div class="note-text">Rechnungen nicht älter als 3 Tage akzeptieren.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card: Vorstellungsgespräch -->
+      <article class="card" data-section="vorstellung">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="card-icon">💬</span>
+            <h2>Vorstellungsgespräch</h2>
+          </div>
+          <span class="badge">2 Min</span>
+        </div>
+
+        <div class="card-body">
+          <label class="item"><input type="checkbox" data-key="intro-duty" /> Auf Dienstpflicht hinweisen (18–23 Uhr)</label>
+          <label class="item"><input type="checkbox" data-key="intro-corruption" /> Korruption erfragen, erklären & Fragen stellen</label>
+          <label class="item"><input type="checkbox" data-key="intro-discord-invite" /> Auf MD Discord einladen</label>
+
+          <div class="note warning">
+            <div class="note-title">Korruption</div>
+            <div class="note-text">Nutze eure festgelegten Fragen/Regeln (siehe interne Vorgaben).</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card: Discord & Dokumentation -->
+      <article class="card" data-section="discord-doku">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="card-icon">💻</span>
+            <h2>Discord & Dokumentation</h2>
+          </div>
+          <span class="badge">5–10 Min</span>
+        </div>
+
+        <div class="card-body">
+          <label class="item"><input type="checkbox" data-key="dc-post" /> Einstellung posten (Format beachten)</label>
+          <label class="item"><input type="checkbox" data-key="dc-logcheck" /> Kontrolle im Log-Channel durchführen</label>
+          <label class="item"><input type="checkbox" data-key="dc-rank" /> Rang eintragen</label>
+          <label class="item"><input type="checkbox" data-key="dc-id" /> Ausweis eintragen/erstellen</label>
+          <label class="item"><input type="checkbox" data-key="dc-channels" /> Wichtige Channels zeigen & erklären</label>
+        </div>
+      </article>
+
+      <!-- Card: In RP -->
+      <article class="card" data-section="in-rp">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="card-icon">🏥</span>
+            <h2>In RP</h2>
+          </div>
+          <span class="badge">~7 Min</span>
+        </div>
+
+        <div class="card-body">
+          <label class="item"><input type="checkbox" data-key="rp-job" /> Job geben</label>
+          <label class="item"><input type="checkbox" data-key="rp-jobmenu" /> Job-Menü erklären</label>
+          <label class="item"><input type="checkbox" data-key="rp-dispatchbind" /> Dispatch-Menü binden & erklären</label>
+          <label class="item"><input type="checkbox" data-key="rp-radio" /> Funk einrichten & erklären</label>
+          <label class="item"><input type="checkbox" data-key="rp-clothes" /> Umziehen (Fraktionsumkleide im EG)</label>
+          <label class="item"><input type="checkbox" data-key="rp-gear" /> Ausrüsten (z.B. Medkits/Defis)</label>
+          <label class="item"><input type="checkbox" data-key="rp-places" /> Wichtige Örtlichkeiten zeigen</label>
+
+          <div class="note">
+            <div class="note-title">Tipp</div>
+            <div class="note-text">Am Ende ein Foto machen und in Clips&Bilder senden (falls ihr das so macht).</div>
+          </div>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>LSMD Intern • Ausbilder-System © 2026</span>
+      <span class="footer-sep">•</span>
+      <span>Made by Bonez</span>
     </div>
-
-</section>
-
-<footer>
-    LSMD Intern • Ausbilder-System Made by Bonez © 2026
-</footer>
+  </footer>
 
 </body>
 </html>
